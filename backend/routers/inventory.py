@@ -37,8 +37,8 @@ def create_product(
 
 @router.post("/upload", response_model=dict)
 async def upload_csv(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    background_tasks: BackgroundTasks = BackgroundTasks(),
     conn: sqlite3.Connection = Depends(db_dependency),
 ):
     if not file.filename.endswith(".csv"):

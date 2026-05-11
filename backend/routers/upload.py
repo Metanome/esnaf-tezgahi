@@ -61,8 +61,8 @@ async def upload_image(
 
 @router.post("/audio", response_model=UploadResult)
 async def upload_audio(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    background_tasks: BackgroundTasks = BackgroundTasks(),
     conn: sqlite3.Connection = Depends(db_dependency),
 ) -> UploadResult:
     if file.content_type not in _SUPPORTED_AUDIO_TYPES:
