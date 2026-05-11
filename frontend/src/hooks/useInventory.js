@@ -1,24 +1,32 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getInventory, updateStock, createProduct, uploadCSV } from '../api/inventory'
+import { getInventory, updateStock, createProduct, uploadCSV, deleteProduct } from '../api/inventory'
+import { useSSE } from '../providers/SSEProvider'
 
 export function useInventory() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { lastUpdate } = useSSE()
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
+  const refresh = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     setError(null)
     try {
       setProducts(await getInventory())
     } catch (e) {
-      setError(e.response?.data?.detail || e.message)
+      if (!silent) setError(e.response?.data?.detail || e.message)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => { 
+    refresh()
+  }, [refresh])
+
+  useEffect(() => {
+    if (lastUpdate) refresh(true)
+  }, [lastUpdate, refresh])
 
   const patch = useCallback(async (id, data) => {
     const updated = await updateStock(id, data)
@@ -38,5 +46,10 @@ export function useInventory() {
     return res
   }, [refresh])
 
-  return { products, loading, error, refresh, patch, create, upload }
+  const remove = useCallback(async (id) => {
+    await deleteProduct(id)
+    setProducts(prev => prev.filter(p => p.id !== id))
+  }, [])
+
+  return { products, loading, error, refresh, patch, create, upload, remove }
 }

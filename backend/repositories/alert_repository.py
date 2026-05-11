@@ -67,6 +67,19 @@ class AlertRepository:
         )
         return cursor.rowcount > 0
 
+    def resolve_by_product(self, product_id: int) -> bool:
+        cursor = self._conn.execute(
+            "UPDATE alerts SET resolved = 1 WHERE product_id = ? AND resolved = 0", (product_id,)
+        )
+        return cursor.rowcount > 0
+
+    def update(self, alert_id: int, alert_type: str, message: str, draft_email: str | None) -> bool:
+        cursor = self._conn.execute(
+            "UPDATE alerts SET type = ?, message = ?, draft_email = ? WHERE id = ?",
+            (alert_type, message, draft_email, alert_id)
+        )
+        return cursor.rowcount > 0
+
     def count_unresolved(self) -> int:
         return self._conn.execute(
             "SELECT COUNT(*) FROM alerts WHERE resolved = 0"

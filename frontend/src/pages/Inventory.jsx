@@ -2,9 +2,12 @@ import { useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import StockBadge from '../components/StockBadge'
 import { useInventory } from '../hooks/useInventory'
+import { useToast } from '../providers/ToastProvider'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { EditIcon, SettingsIcon, TrashIcon, CheckIcon, XIcon, UploadIcon, PlusIcon } from '../components/Icons'
 
 export default function Inventory() {
-  const { products, loading, error, patch, create, upload } = useInventory()
+  const { products, loading, error, patch, create, upload, remove } = useInventory()
   const [searchParams, setSearchParams] = useSearchParams()
   const q = searchParams.get('q') || ''
   const [editId, setEditId] = useState(null)
@@ -14,6 +17,9 @@ export default function Inventory() {
   const [editThreshold, setEditThreshold] = useState('')
   const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState('all')
+
+  const toast = useToast()
+  const [confirmDelete, setConfirmDelete] = useState(null) // { id, name }
 
   const [showModal, setShowModal] = useState(false)
   const [newProduct, setNewProduct] = useState({ name: '', category: '', price: '', stock: '', threshold: '10', supplierName: '', supplierEmail: '' })
@@ -66,7 +72,8 @@ export default function Inventory() {
             </button>
           ))}
           <div className="w-px h-6 bg-slate-800 mx-2 self-center"></div>
-          <button onClick={() => fileInputRef.current?.click()} className="btn-ghost" disabled={uploading}>
+          <button onClick={() => fileInputRef.current?.click()} className="btn-ghost flex items-center gap-2" disabled={uploading}>
+            <UploadIcon size={16} />
             {uploading ? 'Uploading...' : 'Import CSV'}
           </button>
           <input 
@@ -79,17 +86,21 @@ export default function Inventory() {
                 setUploading(true)
                 try {
                   const res = await upload(e.target.files[0])
-                  alert(`Successfully imported ${res.added_count} products.`)
+                  toast(`Successfully imported ${res.added_count} products.`, 'success')
                 } catch (err) {
-                  alert(`Upload failed: ${err.response?.data?.detail || err.message}`)
+                  toast(err.response?.data?.detail || err.message, 'error')
                 }
                 setUploading(false)
                 e.target.value = ''
               }
             }} 
           />
-          <button onClick={() => setShowModal(true)} className="btn-primary">
-            + Add Product
+          <button onClick={() => {
+            setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', supplierName: '', supplierEmail: '' })
+            setShowModal(true)
+          }} className="btn-primary flex items-center gap-2">
+            <PlusIcon size={16} />
+            Add Product
           </button>
         </div>
       </div>
@@ -117,7 +128,7 @@ export default function Inventory() {
                       type="text"
                       value={editCategory}
                       onChange={e => setEditCategory(e.target.value)}
-                      className="input w-28 py-1 text-sm"
+                      className="input w-24 py-1 text-sm"
                     />
                   ) : (
                     p.category
@@ -131,7 +142,7 @@ export default function Inventory() {
                       min="0"
                       value={editPrice}
                       onChange={e => setEditPrice(e.target.value)}
-                      className="input w-20 py-1 text-sm"
+                      className="input w-16 py-1 text-sm"
                     />
                   ) : (
                     `${import.meta.env.VITE_CURRENCY_SYMBOL || '$'}${p.unit_price.toFixed(2)}`
@@ -144,7 +155,7 @@ export default function Inventory() {
                       min="0"
                       value={editQty}
                       onChange={e => setEditQty(e.target.value)}
-                      className="input w-20 text-center py-1 text-sm"
+                      className="input w-16 text-center py-1 text-sm"
                     />
                   ) : (
                     <span className="text-slate-200 font-semibold">{p.stock_quantity}</span>
@@ -157,7 +168,7 @@ export default function Inventory() {
                       min="0"
                       value={editThreshold}
                       onChange={e => setEditThreshold(e.target.value)}
-                      className="input w-20 text-center py-1 text-sm"
+                      className="input w-16 text-center py-1 text-sm"
                     />
                   ) : (
                     <span className="text-slate-500">{p.reorder_threshold}</span>
@@ -166,25 +177,56 @@ export default function Inventory() {
                 <td className="px-4 py-3"><StockBadge status={p.status} /></td>
                 <td className="px-4 py-3 text-right">
                   {editId === p.id ? (
-                    <div className="flex gap-2 justify-end">
-                      <button onClick={() => handleSave(p.id)} disabled={saving} className="btn-primary py-1 px-3 text-xs">
-                        {saving ? '...' : 'Save'}
+                    <div className="flex gap-1 justify-end">
+                      <button onClick={() => handleSave(p.id)} disabled={saving} className="p-1.5 bg-teal-900/40 text-teal-400 hover:bg-teal-900/60 rounded transition-colors" title="Save changes">
+                        {saving ? '...' : <CheckIcon />}
                       </button>
-                      <button onClick={() => setEditId(null)} className="btn-ghost py-1 px-3 text-xs">Cancel</button>
+                      <button onClick={() => setEditId(null)} className="p-1.5 bg-slate-800 text-slate-400 hover:text-slate-200 rounded transition-colors" title="Cancel">
+                        <XIcon />
+                      </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => { 
-                        setEditId(p.id); 
-                        setEditQty(String(p.stock_quantity));
-                        setEditCategory(p.category);
-                        setEditPrice(String(p.unit_price));
-                        setEditThreshold(String(p.reorder_threshold));
-                      }}
-                      className="btn-ghost text-xs"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex gap-1 justify-end">
+                      <button
+                        title="Quick Edit inline"
+                        onClick={() => { 
+                          setEditId(p.id); 
+                          setEditQty(String(p.stock_quantity));
+                          setEditCategory(p.category);
+                          setEditPrice(String(p.unit_price));
+                          setEditThreshold(String(p.reorder_threshold));
+                        }}
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded transition-colors"
+                      >
+                        <EditIcon />
+                      </button>
+                      <button
+                        title="Edit Full Details"
+                        onClick={() => {
+                          setNewProduct({
+                            id: p.id,
+                            name: p.name,
+                            category: p.category,
+                            price: String(p.unit_price),
+                            stock: String(p.stock_quantity),
+                            threshold: String(p.reorder_threshold),
+                            supplierName: p.supplier_name || '',
+                            supplierEmail: p.supplier_email || ''
+                          });
+                          setShowModal(true);
+                        }}
+                        className="p-1.5 bg-teal-900/30 hover:bg-teal-900/50 text-teal-400 rounded transition-colors"
+                      >
+                        <SettingsIcon />
+                      </button>
+                      <button
+                        title="Delete product"
+                        onClick={() => setConfirmDelete({ id: p.id, name: p.name })}
+                        className="p-1.5 bg-red-900/20 hover:bg-red-900/40 text-red-400 rounded transition-colors"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
@@ -198,8 +240,8 @@ export default function Inventory() {
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="card w-full max-w-md space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-100">Add New Product</h2>
-              <p className="text-sm text-slate-500 mt-1">Enter product details to add to inventory.</p>
+              <h2 className="text-xl font-bold text-slate-100">{newProduct.id ? 'Edit Product' : 'Add New Product'}</h2>
+              <p className="text-sm text-slate-500 mt-1">{newProduct.id ? 'Update product details.' : 'Enter product details to add to inventory.'}</p>
             </div>
             <div className="space-y-4">
               <div>
@@ -289,10 +331,10 @@ export default function Inventory() {
               </button>
               <button 
                 onClick={async () => {
-                  if (!newProduct.name) return alert('Name is required')
+                  if (!newProduct.name) return toast('Name is required', 'warning')
                   setSaving(true)
                   try {
-                    await create({
+                    const payload = {
                       name: newProduct.name,
                       category: newProduct.category || 'General',
                       unit_price: parseFloat(newProduct.price || 0),
@@ -300,23 +342,43 @@ export default function Inventory() {
                       reorder_threshold: parseInt(newProduct.threshold || 10, 10),
                       supplier_name: newProduct.supplierName || '',
                       supplier_email: newProduct.supplierEmail || ''
-                    })
+                    };
+                    
+                    if (newProduct.id) {
+                      await patch(newProduct.id, payload)
+                      toast('Product updated.', 'success')
+                    } else {
+                      await create(payload)
+                      toast('Product added to inventory.', 'success')
+                    }
                     setShowModal(false)
                     setNewProduct({ name: '', category: '', price: '', stock: '', threshold: '10', supplierName: '', supplierEmail: '' })
                   } catch (e) {
-                    alert('Error creating product')
+                    toast(e.response?.data?.detail || 'Error saving product', 'error')
                   }
                   setSaving(false)
                 }}
                 disabled={saving || !newProduct.name}
                 className="btn-primary"
               >
-                {saving ? 'Saving...' : 'Add Product'}
+                {saving ? 'Saving...' : (newProduct.id ? 'Save Changes' : 'Add Product')}
               </button>
             </div>
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${confirmDelete?.name}"? This cannot be undone.`}
+        danger
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={async () => {
+          await remove(confirmDelete.id)
+          toast(`"${confirmDelete.name}" deleted.`, 'warning')
+          setConfirmDelete(null)
+        }}
+      />
     </div>
   )
 }

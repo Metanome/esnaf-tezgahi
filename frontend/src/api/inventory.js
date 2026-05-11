@@ -7,3 +7,4 @@ export const uploadCSV = (file) => {
   formData.append('file', file)
   return client.post('/inventory/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
 }
+export const deleteProduct = (id) => client.delete(`/inventory/${id}`).then(r => r.data)

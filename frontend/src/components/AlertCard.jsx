@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ALERT_TYPE_LABELS } from '../constants'
+import { MailIcon, XIcon, CheckCircleIcon } from './Icons'
 
 export default function AlertCard({ alert, onResolve }) {
   const [showEmail, setShowEmail] = useState(false)
@@ -32,18 +33,19 @@ export default function AlertCard({ alert, onResolve }) {
         <div className="flex items-center gap-2 flex-shrink-0">
           {alert.draft_email && (
             <button
-              className="btn-ghost text-teal-400 hover:text-teal-300"
+              className="btn-ghost text-teal-400 hover:text-teal-300 flex items-center gap-1.5"
               onClick={() => setShowEmail(v => !v)}
             >
-              {showEmail ? 'Hide' : 'View'} Email
+              <MailIcon size={14} />
+              {showEmail ? 'Hide' : 'Email'}
             </button>
           )}
           <button
-            className="btn-ghost text-green-400 hover:text-green-300 disabled:opacity-40"
+            className="btn-ghost text-green-400 hover:text-green-300 disabled:opacity-40 flex items-center gap-1.5"
             onClick={handleResolve}
             disabled={resolving}
           >
-            {resolving ? '...' : 'Dismiss'}
+            {resolving ? '...' : <><CheckCircleIcon size={14} /> Dismiss</>}
           </button>
         </div>
       </div>

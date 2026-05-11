@@ -1,10 +1,13 @@
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 
 from database import db_dependency
 from repositories.order_repository import OrderRepository
+from repositories.product_repository import ProductRepository
 from schemas.order import OrderResponse, OrderUpdate
+from services.alert_service import check_and_alert_stock
+from services.event_service import notify_clients
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
 
@@ -16,9 +19,6 @@ def get_orders(
 ) -> list[OrderResponse]:
     return OrderRepository(conn).get_all(status=status)
 
-
-from fastapi import BackgroundTasks
-from services.alert_service import check_and_alert_stock
 
 @router.patch("/{order_id}", response_model=OrderResponse)
 def update_order(
@@ -35,8 +35,23 @@ def update_order(
         raise HTTPException(status_code=404, detail="Order not found")
         
     if current_order.status == "pending" and data.status == "fulfilled":
-        from repositories.product_repository import ProductRepository
         prod_repo = ProductRepository(conn)
+
+        # Validate all items have sufficient stock before deducting anything
+        insufficient = []
+        for item in current_order.items:
+            product = prod_repo.get_by_id(item.product_id)
+            if product is None or product.stock_quantity < item.quantity:
+                available = product.stock_quantity if product else 0
+                insufficient.append(
+                    f"{item.product_name}: need {item.quantity}, have {available}"
+                )
+        if insufficient:
+            raise HTTPException(
+                status_code=422,
+                detail="Insufficient stock — " + "; ".join(insufficient),
+            )
+
         for item in current_order.items:
             prod_repo.update_stock(item.product_id, -item.quantity)
             conn.commit()  # Release DB lock before background task
@@ -44,4 +59,5 @@ def update_order(
 
     updated = repo.update_status(order_id, data.status)
     conn.commit() # Ensure order status is committed
+    notify_clients("update")
     return updated

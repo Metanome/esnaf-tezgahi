@@ -1,14 +1,19 @@
 import { useState } from 'react'
 import { useSettings } from '../hooks/useSettings'
 import { resetDatabase } from '../api/settings'
+import { useToast } from '../providers/ToastProvider'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { EyeIcon, EyeOffIcon, SaveIcon, RotateCcwIcon } from '../components/Icons'
 
 export default function Settings() {
   const { settings, loading, saving, error, save } = useSettings()
+  const toast = useToast()
   const [model, setModel] = useState('')
   const [apiKey, setApiKey] = useState('')
   const [showKey, setShowKey] = useState(false)
   const [saved, setSaved] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
 
   const handleSave = async () => {
     const payload = {}
@@ -20,8 +25,11 @@ export default function Settings() {
       await save(payload)
       setApiKey('')
       setSaved(true)
+      toast('Settings saved successfully.', 'success')
       setTimeout(() => setSaved(false), 3000)
-    } catch (_) {}
+    } catch (_) {
+      toast('Failed to save settings.', 'error')
+    }
   }
 
   if (loading) return <div className="text-slate-500 text-sm">Loading settings...</div>
@@ -68,11 +76,11 @@ export default function Settings() {
               placeholder={settings?.api_key_set ? '••••••••••••••••••• (key is set)' : 'Enter your API key'}
             />
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
               onClick={() => setShowKey(v => !v)}
               type="button"
             >
-              {showKey ? 'Hide' : 'Show'}
+              {showKey ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
             </button>
           </div>
           <p className="text-xs text-slate-600 mt-1.5">
@@ -82,8 +90,8 @@ export default function Settings() {
 
         {error && <p className="text-red-400 text-sm">Error: {error}</p>}
 
-        <button className="btn-primary w-full" onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
+        <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={handleSave} disabled={saving}>
+          {saving ? <><RotateCcwIcon size={15} className="animate-spin" /> Saving...</> : saved ? <><SaveIcon size={15} /> Saved!</> : <><SaveIcon size={15} /> Save Settings</>}
         </button>
       </div>
 
@@ -99,23 +107,32 @@ export default function Settings() {
           Use this to reset your environment for a clean demo.
         </p>
         <button 
-          className="btn-ghost text-red-400 border border-red-500/30 hover:bg-red-500/10 hover:text-red-300 transition-colors py-2 px-4"
+          className="btn-ghost text-red-400 border border-red-500/30 hover:bg-red-500/10 hover:text-red-300 transition-colors py-2 px-4 flex items-center gap-2"
           disabled={resetting}
-          onClick={async () => {
-            if (window.confirm("Are you sure? This will delete all orders, inventory, and alerts!")) {
-              setResetting(true)
-              try {
-                await resetDatabase()
-                window.location.reload()
-              } catch (e) {
-                alert("Reset failed: " + (e.response?.data?.detail || e.message))
-                setResetting(false)
-              }
-            }
-          }}
+          onClick={() => setConfirmReset(true)}
         >
+          <RotateCcwIcon size={15} />
           {resetting ? 'Resetting...' : 'Reset Database & Reseed'}
         </button>
+
+      <ConfirmDialog
+        open={confirmReset}
+        title="Reset Database?"
+        message="This will permanently delete all orders, inventory, and alerts, then reseed with default data. This cannot be undone."
+        danger
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={async () => {
+          setConfirmReset(false)
+          setResetting(true)
+          try {
+            await resetDatabase()
+            window.location.reload()
+          } catch (e) {
+            toast('Reset failed: ' + (e.response?.data?.detail || e.message), 'error')
+            setResetting(false)
+          }
+        }}
+      />
       </div>
     </div>
   )

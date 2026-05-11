@@ -1,12 +1,13 @@
 import { NavLink } from 'react-router-dom'
 import { ROUTES } from '../constants'
+import { LayoutDashboardIcon, UploadIcon, PackageIcon, ShoppingCartIcon, SettingsIcon, XIcon } from './Icons'
 
 const links = [
-  { to: ROUTES.DASHBOARD, label: 'Dashboard' },
-  { to: ROUTES.UPLOAD, label: 'Upload' },
-  { to: ROUTES.INVENTORY, label: 'Inventory' },
-  { to: ROUTES.ORDERS, label: 'Orders' },
-  { to: ROUTES.SETTINGS, label: 'Settings' },
+  { to: ROUTES.DASHBOARD, label: 'Dashboard', icon: <LayoutDashboardIcon size={18} /> },
+  { to: ROUTES.UPLOAD, label: 'Upload', icon: <UploadIcon size={18} /> },
+  { to: ROUTES.INVENTORY, label: 'Inventory', icon: <PackageIcon size={18} /> },
+  { to: ROUTES.ORDERS, label: 'Orders', icon: <ShoppingCartIcon size={18} /> },
+  { to: ROUTES.SETTINGS, label: 'Settings', icon: <SettingsIcon size={18} /> },
 ]
 
 export default function Navbar({ isOpen, onClose }) {
@@ -27,11 +28,11 @@ export default function Navbar({ isOpen, onClose }) {
             <div className="text-slate-500 text-xs mt-0.5">AI Operations Platform</div>
           </div>
           <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <XIcon size={20} />
           </button>
         </div>
       <ul className="flex-1 px-3 py-4 space-y-1">
-        {links.map(({ to, label }) => (
+        {links.map(({ to, label, icon }) => (
           <li key={to}>
             <NavLink
               to={to}
@@ -44,6 +45,7 @@ export default function Navbar({ isOpen, onClose }) {
                 }`
               }
             >
+              <span className="opacity-80">{icon}</span>
               {label}
             </NavLink>
           </li>

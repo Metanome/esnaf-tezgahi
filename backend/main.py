@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from routers import alerts, inventory, orders, settings, upload
+from routers import alerts, events, inventory, orders, settings, upload
 
 logging.basicConfig(
     filename='backend.log',
@@ -36,11 +36,16 @@ app.include_router(orders.router)
 app.include_router(inventory.router)
 app.include_router(alerts.router)
 app.include_router(settings.router)
+app.include_router(events.router)
 
 
 @app.on_event("startup")
 def on_startup() -> None:
+    import asyncio
+    from services.event_service import set_event_loop
+    
     init_db()
+    set_event_loop(asyncio.get_running_loop())
 
 
 @app.get("/api/health")

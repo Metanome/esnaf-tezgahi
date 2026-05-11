@@ -4,7 +4,7 @@ from schemas.product import ProductCreate, ProductResponse, ProductUpdate
 
 
 def _stock_status(qty: int, threshold: int) -> str:
-    if qty == 0:
+    if qty <= threshold * 0.2:
         return "critical"
     if qty < threshold:
         return "low"
@@ -99,3 +99,7 @@ class ProductRepository:
             "SELECT * FROM products WHERE stock_quantity < reorder_threshold ORDER BY stock_quantity"
         ).fetchall()
         return [_row_to_product(r) for r in rows]
+
+    def delete(self, product_id: int) -> bool:
+        cursor = self._conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
+        return cursor.rowcount > 0

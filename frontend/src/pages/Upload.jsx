@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { uploadImage, uploadAudio } from '../api/upload'
 import AgentThinking from '../components/AgentThinking'
 import ReasoningPanel from '../components/ReasoningPanel'
+import { ImageIcon, MicIcon, RotateCcwIcon, UploadIcon } from '../components/Icons'
 
 const ACCEPTED_IMAGE = 'image/jpeg,image/png,image/webp'
 const ACCEPTED_AUDIO = 'audio/wav,audio/mpeg,audio/mp4,audio/ogg,audio/webm'
@@ -28,6 +29,7 @@ function DropZone({ onFile, accept, label, icon, hint, disabled }) {
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
     >
+      <div className="mb-1 opacity-70">{icon}</div>
       <div>
         <div className="text-slate-200 font-semibold">{label}</div>
         <div className="text-xs text-slate-500 mt-1">{hint}</div>
@@ -87,18 +89,21 @@ export default function Upload() {
             label="Order Slip"
             hint="JPG, PNG, or WEBP - handwritten or printed"
             accept={ACCEPTED_IMAGE}
+            icon={<ImageIcon size={32} className="text-teal-500" />}
             onFile={(f) => process(f, uploadImage)}
           />
           <DropZone
             label="Shelf Scan"
             hint="Photo of your storage shelf or product display"
             accept={ACCEPTED_IMAGE}
+            icon={<ImageIcon size={32} className="text-teal-500" />}
             onFile={(f) => process(f, uploadImage)}
           />
           <DropZone
             label="Voice Note"
             hint="WAV, MP3, or M4A - speak in Turkish or English"
             accept={ACCEPTED_AUDIO}
+            icon={<MicIcon size={32} className="text-teal-500" />}
             onFile={(f) => process(f, uploadAudio)}
           />
         </div>
@@ -109,7 +114,9 @@ export default function Upload() {
       {error && (
         <div className="card border-red-500/40 bg-red-950/20">
           <p className="text-red-400 text-sm">Error: {error}</p>
-          <button className="btn-ghost mt-3" onClick={() => setError(null)}>Try again</button>
+          <button className="btn-ghost mt-3 flex items-center gap-2" onClick={() => setError(null)}>
+            <RotateCcwIcon size={14} /> Try again
+          </button>
         </div>
       )}
 
@@ -124,8 +131,8 @@ export default function Upload() {
             actions={result.actions_taken}
             model={result.model_used}
           />
-          <button className="btn-primary w-full" onClick={() => setResult(null)}>
-            Upload Another
+          <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => setResult(null)}>
+            <UploadIcon size={16} /> Upload Another
           </button>
         </div>
       )}

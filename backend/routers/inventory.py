@@ -2,11 +2,13 @@ import sqlite3
 import csv
 import io
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 
 from database import db_dependency
 from repositories.product_repository import ProductRepository
 from schemas.product import ProductCreate, ProductResponse, ProductUpdate
+from services.alert_service import check_and_alert_stock
+from services.event_service import notify_clients
 
 router = APIRouter(prefix="/api/inventory", tags=["inventory"])
 
@@ -15,9 +17,6 @@ router = APIRouter(prefix="/api/inventory", tags=["inventory"])
 def get_inventory(conn: sqlite3.Connection = Depends(db_dependency)) -> list[ProductResponse]:
     return ProductRepository(conn).get_all()
 
-
-from fastapi import BackgroundTasks
-from services.alert_service import check_and_alert_stock
 
 @router.post("", response_model=ProductResponse)
 def create_product(
@@ -30,6 +29,7 @@ def create_product(
         created = repo.create(data)
         conn.commit()  # Release DB lock
         background_tasks.add_task(check_and_alert_stock, created.id)
+        notify_clients("update")
         return created
     except sqlite3.IntegrityError:
         raise HTTPException(status_code=400, detail="Product with this SKU already exists")
@@ -74,11 +74,9 @@ async def upload_csv(
         except Exception as e:
             continue
             
+    notify_clients("update")
     return {"status": "success", "added_count": added_count}
 
-
-from fastapi import BackgroundTasks
-from services.alert_service import check_and_alert_stock
 
 @router.patch("/{product_id}", response_model=ProductResponse)
 def update_product(
@@ -96,4 +94,22 @@ def update_product(
         conn.commit()  # Release DB lock before background task
         background_tasks.add_task(check_and_alert_stock, updated.id)
         
+    notify_clients("update")
     return updated
+
+@router.delete("/{product_id}", response_model=dict)
+def delete_product(
+    product_id: int,
+    conn: sqlite3.Connection = Depends(db_dependency),
+):
+    repo = ProductRepository(conn)
+    
+    # We should delete associated alerts first if we enforce foreign keys
+    conn.execute("DELETE FROM alerts WHERE product_id = ?", (product_id,))
+    
+    if not repo.delete(product_id):
+        raise HTTPException(status_code=404, detail="Product not found")
+        
+    conn.commit()
+    notify_clients("update")
+    return {"success": True}

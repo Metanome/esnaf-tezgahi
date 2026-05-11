@@ -1,6 +1,7 @@
 import sqlite3
 
 from agents import planner_agent
+from config import get_settings
 from prompts import ORDER_EXTRACTION_PROMPT, SHELF_SCAN_PROMPT
 from repositories.alert_repository import AlertRepository
 from repositories.order_repository import OrderRepository
@@ -9,7 +10,7 @@ from schemas.agent import OrderExtractionResult, ShelfScanResult, UploadResult
 from schemas.alert import AlertCreate
 from schemas.order import OrderCreate
 from schemas.product import ProductCreate
-from services.email_service import draft_reorder_email
+from services.alert_service import sync_alert
 from services.gemini_service import generate_from_image
 
 
@@ -51,20 +52,18 @@ def process_order_slip(
             actions.append(f"✨ Auto-created missing product: '{item.product_name}'")
         else:
             product = matches[0]
-        product_repo.update_stock(product.id, -item.quantity)
-        order_items.append({"product_id": product.id, "quantity": item.quantity})
-        actions.append(f"✅ Deducted {item.quantity}× {product.name} from stock")
 
-        updated = product_repo.get_by_id(product.id)
-        if updated and updated.status in ("low", "critical"):
-            if not alert_repo.alert_exists_for_product(product.id):
-                alert_type = "critical_stock" if updated.status == "critical" else "low_stock"
-                alert_repo.create(AlertCreate(
-                    type=alert_type,
-                    product_id=product.id,
-                    message=f"{product.name} is {updated.status} ({updated.stock_quantity} units remaining).",
-                ))
-                actions.append(f"🔔 Alert created: {product.name} is {updated.status}")
+        if product.stock_quantity < item.quantity:
+            actions.append(
+                f"⚠️ Insufficient stock for {product.name}: need {item.quantity}, have {product.stock_quantity} — skipped deduction"
+            )
+        else:
+            product_repo.update_stock(product.id, -item.quantity)
+            actions.append(f"✅ Deducted {item.quantity}× {product.name} from stock")
+
+        order_items.append({"product_id": product.id, "quantity": item.quantity})
+        sync_alert(conn, product.id)
+        actions.append(f"🔔 Alert synced for {product.name}")
 
     if order_items:
         order_repo.create(OrderCreate(
@@ -84,7 +83,6 @@ def process_order_slip(
     reasoning = planner_agent.synthesize_reasoning(context)
     alerts_created = sum(1 for a in actions if "Alert created" in a)
 
-    from config import get_settings
     return UploadResult(
         input_type="image_order",
         actions_taken=actions,
@@ -109,7 +107,6 @@ def process_shelf_scan(
     scan = ShelfScanResult(**raw)
 
     actions: list[str] = []
-    critical_products_for_email: list[dict] = []
 
     for detected in scan.products_detected:
         if detected.status == "adequate":
@@ -119,43 +116,16 @@ def process_shelf_scan(
         product_id = matches[0].id if matches else None
         product_display = matches[0].name if matches else detected.name
 
-        if product_id and alert_repo.alert_exists_for_product(product_id):
-            continue
-
-        alert_type = "critical_stock" if detected.status == "critical" else "low_stock"
-        draft_email = None
-
-        if detected.status == "critical" and matches:
-            p = matches[0]
-            critical_products_for_email.append({
-                "name": p.name,
-                "sku": p.sku,
-                "stock_quantity": p.stock_quantity,
-                "supplier_name": p.supplier_name,
-                "supplier_email": p.supplier_email,
-            })
-
-        alert_repo.create(AlertCreate(
-            type=alert_type,
-            product_id=product_id,
-            message=f"Shelf scan detected '{product_display}' as {detected.status}.",
-            draft_email=draft_email,
-        ))
-        actions.append(f"🔔 Alert: '{product_display}' appears {detected.status} on shelf")
-
-    if critical_products_for_email:
-        supplier_name = critical_products_for_email[0]["supplier_name"] or "Supplier"
-        supplier_email = critical_products_for_email[0]["supplier_email"] or ""
-        email_body = draft_reorder_email(supplier_name, supplier_email, critical_products_for_email)
-        last_critical = conn.execute(
-            "SELECT id FROM alerts WHERE type = 'critical_stock' ORDER BY id DESC LIMIT 1"
-        ).fetchone()
-        if last_critical:
-            conn.execute(
-                "UPDATE alerts SET draft_email = ? WHERE id = ?",
-                (email_body, last_critical["id"]),
-            )
-        actions.append(f"✉️ Reorder email drafted for {len(critical_products_for_email)} critical product(s)")
+        if product_id:
+            sync_alert(conn, product_id)
+            actions.append(f"🔔 Alert synced for '{product_display}' via shelf scan")
+        else:
+            alert_repo.create(AlertCreate(
+                type="critical_stock" if detected.status == "critical" else "low_stock",
+                product_id=None,
+                message=f"Shelf scan detected unknown product '{detected.name}' as {detected.status}.",
+            ))
+            actions.append(f"🔔 Alert: '{detected.name}' appears {detected.status} on shelf")
 
     context = (
         f"Input type: shelf scan. "
@@ -166,7 +136,6 @@ def process_shelf_scan(
     )
     reasoning = planner_agent.synthesize_reasoning(context)
 
-    from config import get_settings
     return UploadResult(
         input_type="image_shelf",
         actions_taken=actions,

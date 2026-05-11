@@ -57,7 +57,13 @@ ALERTS = [
         "Dear Karadeniz Bal Evi team,\n\nI hope this message finds you well. We are running critically low on Kestane Balı 450g (currently only 2 units in stock, well below our minimum threshold of 8 units).\n\nCould you please arrange an urgent restocking order at your earliest convenience? Please confirm availability and estimated delivery date.\n\nBest regards,\nAnadolu Doğal Kooperatifi",
         0,
     ),
-    ("critical_stock", 20, "Antep Fıstığı 250g is out of stock (0 units).", None, 0),
+    (
+        "critical_stock", 
+        20, 
+        "Antep Fıstığı 250g is out of stock (0 units).", 
+        "Dear Güneydoğu Tarım team,\n\nOur stock for Antep Fıstığı 250g has completely depleted. Please arrange an immediate delivery of 50 units to our main warehouse.\n\nThank you,\nAnadolu Doğal Kooperatifi", 
+        0
+    ),
     ("low_stock", 8, "Karabuğday 500g stock is low (6 units, threshold: 8).", None, 1),
     ("low_stock", 7, "Dut Pekmezi 700g stock is low (4 units).", None, 1),
 ]

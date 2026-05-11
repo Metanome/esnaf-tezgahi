@@ -11,10 +11,12 @@ from repositories.order_repository import OrderRepository
 from repositories.product_repository import ProductRepository
 from schemas.agent import UploadResult
 from schemas.alert import AlertCreate
+from schemas.order import OrderCreate
 from schemas.product import ProductCreate
 from config import get_settings
 from fastapi import BackgroundTasks
 from services.alert_service import check_and_alert_stock
+from services.event_service import notify_clients
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
@@ -55,6 +57,8 @@ async def upload_image(
         actions_taken=result.actions_taken,
         model_used=result.model_used,
     )
+    conn.commit()
+    notify_clients("update")
 
     return result
 
@@ -106,12 +110,16 @@ async def upload_audio(
             else:
                 product = matches[0]
 
-            product_repo.update_stock(product.id, -quantity)
+            if product.stock_quantity < quantity:
+                actions.append(f"⚠️ Insufficient stock for {product.name}: need {quantity}, have {product.stock_quantity} — skipped deduction")
+            else:
+                product_repo.update_stock(product.id, -quantity)
+                actions.append(f"✅ Deducted {quantity}× {product.name} from stock")
             conn.commit() # Commit before background task
             background_tasks.add_task(check_and_alert_stock, product.id)
             
             order_repo.create(
-                __import__("schemas.order", fromlist=["OrderCreate"]).OrderCreate(
+                OrderCreate(
                     customer_name=customer,
                     source="voice",
                     items=[{"product_id": product.id, "quantity": quantity}],
@@ -160,6 +168,8 @@ async def upload_audio(
         actions_taken=actions,
         model_used=model_used,
     )
+    conn.commit()
+    notify_clients("update")
 
     return UploadResult(
         input_type="voice",

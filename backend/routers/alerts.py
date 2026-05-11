@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from database import db_dependency
 from repositories.alert_repository import AlertRepository
 from schemas.alert import AlertResponse
+from services.event_service import notify_clients
 
 router = APIRouter(prefix="/api/alerts", tags=["alerts"])
 
@@ -25,4 +26,6 @@ def resolve_alert(
 ) -> dict:
     if not AlertRepository(conn).resolve(alert_id):
         raise HTTPException(status_code=404, detail="Alert not found")
+    conn.commit()
+    notify_clients("update")
     return {"success": True}
