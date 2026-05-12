@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { updateProfile } from '../api/profile'
 
 const ThemeContext = createContext(null)
 
@@ -22,8 +23,14 @@ export function ThemeProvider({ children }) {
     localStorage.setItem('et-fontsize', fontSize)
   }, [fontSize])
 
+  const langMounted = useRef(false)
   useEffect(() => {
     localStorage.setItem('et-lang', lang)
+    if (langMounted.current) {
+      updateProfile({ language_preference: lang }).catch(() => {})
+    } else {
+      langMounted.current = true
+    }
   }, [lang])
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
@@ -31,7 +38,7 @@ export function ThemeProvider({ children }) {
   const cycleFontSize = () => setFontSize(f => ({ md: 'lg', lg: 'xl', xl: 'md' }[f]))
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, lang, toggleLang, fontSize, cycleFontSize }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, lang, setLang, toggleLang, fontSize, cycleFontSize }}>
       {children}
     </ThemeContext.Provider>
   )

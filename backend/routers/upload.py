@@ -1,6 +1,6 @@
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
 from google.genai.errors import ServerError
 
 from agents import classifier_agent, vision_agent, voice_agent
@@ -32,6 +32,7 @@ def _base_mime(content_type: str) -> str:
 @router.post("/image", response_model=UploadResult)
 async def upload_image(
     file: UploadFile = File(...),
+    lang: str = Form("en"),
     conn: sqlite3.Connection = Depends(db_dependency),
 ) -> UploadResult:
     if file.content_type not in _SUPPORTED_IMAGE_TYPES:
@@ -55,9 +56,9 @@ async def upload_image(
 
     try:
         if classification.type == "order_slip":
-            result = vision_agent.process_order_slip(image_bytes, file.content_type, conn)
+            result = vision_agent.process_order_slip(image_bytes, file.content_type, conn, lang)
         else:
-            result = vision_agent.process_shelf_scan(image_bytes, file.content_type, conn)
+            result = vision_agent.process_shelf_scan(image_bytes, file.content_type, conn, lang)
     except ServerError:
         raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
     except ValueError as exc:
@@ -81,6 +82,7 @@ async def upload_image(
 async def upload_audio(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
+    lang: str = Form("en"),
     conn: sqlite3.Connection = Depends(db_dependency),
 ) -> UploadResult:
     mime = _base_mime(file.content_type or "")
@@ -177,7 +179,7 @@ async def upload_audio(
         f"Entities: {intent_result.entities}. "
         f"Actions taken: {actions}."
     )
-    reasoning = synthesize_reasoning(context)
+    reasoning = synthesize_reasoning(context, lang)
 
     log_repo = AgentLogRepository(conn)
     model_used = get_settings().default_model

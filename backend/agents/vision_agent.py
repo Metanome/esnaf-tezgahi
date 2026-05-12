@@ -18,6 +18,7 @@ def process_order_slip(
     image_bytes: bytes,
     mime_type: str,
     conn: sqlite3.Connection,
+    lang: str = "en",
 ) -> UploadResult:
     """
     Extract an order from a handwritten/printed order slip image,
@@ -80,7 +81,7 @@ def process_order_slip(
         f"Actions taken: {actions}. "
         f"Notes: {extraction.notes or 'none'}."
     )
-    reasoning = planner_agent.synthesize_reasoning(context)
+    reasoning = planner_agent.synthesize_reasoning(context, lang)
     alerts_created = sum(1 for a in actions if a.startswith("[alert]"))
 
     return UploadResult(
@@ -96,6 +97,7 @@ def process_shelf_scan(
     image_bytes: bytes,
     mime_type: str,
     conn: sqlite3.Connection,
+    lang: str = "en",
 ) -> UploadResult:
     """
     Assess shelf stock levels from a photo and create alerts for low/critical products.
@@ -141,7 +143,7 @@ def process_shelf_scan(
         f"Products detected: {[f'{p.name} ({p.status})' for p in scan.products_detected]}. "
         f"Actions taken: {actions}."
     )
-    reasoning = planner_agent.synthesize_reasoning(context)
+    reasoning = planner_agent.synthesize_reasoning(context, lang)
 
     return UploadResult(
         input_type="image_shelf",

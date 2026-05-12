@@ -64,10 +64,10 @@ def update_settings(data: SettingsUpdate) -> SettingsResponse:
 
 @router.get("/profile", response_model=ProfileResponse)
 def get_profile(conn: sqlite3.Connection = Depends(db_dependency)) -> ProfileResponse:
-    row = conn.execute("SELECT display_name, store_name FROM profile WHERE id = 1").fetchone()
+    row = conn.execute("SELECT display_name, store_name, language_preference FROM profile WHERE id = 1").fetchone()
     if not row:
-        return ProfileResponse(display_name="", store_name="")
-    return ProfileResponse(display_name=row["display_name"], store_name=row["store_name"])
+        return ProfileResponse(display_name="", store_name="", language_preference="tr")
+    return ProfileResponse(display_name=row["display_name"], store_name=row["store_name"], language_preference=row["language_preference"])
 
 
 @router.put("/profile", response_model=ProfileResponse)
@@ -78,15 +78,17 @@ def update_profile(
     conn.execute(
         """
         UPDATE profile
-        SET display_name = COALESCE(?, display_name),
-            store_name   = COALESCE(?, store_name),
-            updated_at   = datetime('now')
+        SET display_name        = COALESCE(?, display_name),
+            store_name          = COALESCE(?, store_name),
+            language_preference = COALESCE(?, language_preference),
+            updated_at          = datetime('now')
         WHERE id = 1
         """,
-        (data.display_name, data.store_name),
+        (data.display_name, data.store_name, data.language_preference),
     )
-    row = conn.execute("SELECT display_name, store_name FROM profile WHERE id = 1").fetchone()
-    return ProfileResponse(display_name=row["display_name"], store_name=row["store_name"])
+    conn.commit()
+    row = conn.execute("SELECT display_name, store_name, language_preference FROM profile WHERE id = 1").fetchone()
+    return ProfileResponse(display_name=row["display_name"], store_name=row["store_name"], language_preference=row["language_preference"])
 
 
 @router.get("/dashboard-summary")

@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { getProfile, updateProfile } from '../api/profile'
+import { useTheme } from './ThemeProvider'
 
 const ProfileContext = createContext(null)
 
@@ -7,16 +8,22 @@ export function ProfileProvider({ children }) {
   const [profile, setProfile] = useState({ display_name: '', store_name: '' })
   const [loading, setLoading] = useState(true)
   const [needsSetup, setNeedsSetup] = useState(false)
+  const { setLang } = useTheme()
+  const initDone = useRef(false)
 
   useEffect(() => {
     getProfile()
       .then(data => {
         setProfile(data)
+        if (!initDone.current && data.language_preference) {
+          setLang(data.language_preference)
+          initDone.current = true
+        }
         if (!data.display_name || !data.store_name) setNeedsSetup(true)
       })
       .catch(() => setNeedsSetup(true))
       .finally(() => setLoading(false))
-  }, [])
+  }, [setLang])
 
   const saveProfile = async (data) => {
     const updated = await updateProfile(data)

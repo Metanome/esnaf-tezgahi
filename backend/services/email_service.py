@@ -6,8 +6,12 @@ def draft_reorder_email(
     supplier_name: str,
     supplier_email: str,
     products: list[dict],  # [{"name": str, "sku": str, "stock_quantity": int}]
+    lang: str = "tr",
 ) -> str:
     """Generate a supplier reorder email body using Gemini."""
+    language_instruction = (
+        "Write the email in Turkish (Türkçe)." if lang == "tr" else "Write the email in English."
+    )
     products_list = "\n".join(
         f"- {p['name']} (SKU: {p['sku']}, current stock: {p['stock_quantity']} units)"
         for p in products
@@ -16,5 +20,6 @@ def draft_reorder_email(
         supplier_name=supplier_name,
         supplier_email=supplier_email,
         products_list=products_list,
+        language_instruction=language_instruction,
     )
     return generate_text(prompt)

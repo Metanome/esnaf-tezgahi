@@ -1,13 +1,15 @@
 import client from './client'
 
-export const uploadImage = (file) => {
+export const uploadImage = (file, lang = 'en') => {
   const form = new FormData()
   form.append('file', file)
+  form.append('lang', lang)
   return client.post('/upload/image', form).then(r => r.data)
 }
 
-export const uploadAudio = (file) => {
+export const uploadAudio = (file, lang = 'en') => {
   const form = new FormData()
   form.append('file', file)
+  form.append('lang', lang)
   return client.post('/upload/audio', form).then(r => r.data)
 }

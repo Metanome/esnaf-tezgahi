@@ -157,7 +157,7 @@ export default function Upload() {
     const steps = [1, 2, 3, 4]
     const timers = steps.map((s, i) => setTimeout(() => setThinkStep(s), (i + 1) * 1800))
     try {
-      const data = await uploadFn(file)
+      const data = await uploadFn(file, lang)
       steps.forEach((_, i) => clearTimeout(timers[i]))
       setResult(data)
     } catch (e) {
@@ -166,7 +166,7 @@ export default function Upload() {
     } finally {
       setThinking(false)
     }
-  }, [])
+  }, [lang])
 
   return (
     <div className="space-y-8">

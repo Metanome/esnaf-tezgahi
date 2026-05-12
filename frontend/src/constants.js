@@ -139,6 +139,7 @@ export const T = {
     setupStoreNamePlaceholder: "İşletmenizin Adı",
     setupSave: "Başla",
     editProfile: "Profili Düzenle",
+    appSubtitle: "AI Operasyon Platformu",
   },
   en: {
     dashboard: "Dashboard",
@@ -269,5 +270,6 @@ export const T = {
     setupStoreNamePlaceholder: "Your Store Name",
     setupSave: "Get Started",
     editProfile: "Edit Profile",
+    appSubtitle: "AI Operations Platform",
   }
 }

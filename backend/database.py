@@ -6,10 +6,11 @@ from config import get_settings
 
 _CREATE_TABLES_SQL = """
 CREATE TABLE IF NOT EXISTS profile (
-    id           INTEGER PRIMARY KEY CHECK (id = 1),
-    display_name TEXT NOT NULL DEFAULT '',
-    store_name   TEXT NOT NULL DEFAULT '',
-    updated_at   DATETIME NOT NULL DEFAULT (datetime('now'))
+    id                  INTEGER PRIMARY KEY CHECK (id = 1),
+    display_name        TEXT NOT NULL DEFAULT '',
+    store_name          TEXT NOT NULL DEFAULT '',
+    language_preference TEXT NOT NULL DEFAULT 'tr',
+    updated_at          DATETIME NOT NULL DEFAULT (datetime('now'))
 );
 INSERT OR IGNORE INTO profile (id, display_name, store_name) VALUES (1, '', '');
 
@@ -69,7 +70,11 @@ def init_db() -> None:
     conn = sqlite3.connect(settings.database_path)
     try:
         conn.executescript(_CREATE_TABLES_SQL)
-        conn.commit()
+        try:
+            conn.execute("ALTER TABLE profile ADD COLUMN language_preference TEXT NOT NULL DEFAULT 'tr'")
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # Column already exists
     finally:
         conn.close()
 

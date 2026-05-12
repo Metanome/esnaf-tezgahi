@@ -36,10 +36,15 @@ def sync_alert(conn: sqlite3.Connection, product_id: int):
     if product.status == "critical":
         # Only draft if a supplier exists
         if product.supplier_name and product.supplier_email:
+            profile_row = conn.execute(
+                "SELECT language_preference FROM profile WHERE id = 1"
+            ).fetchone()
+            lang = profile_row["language_preference"] if profile_row else "tr"
             draft_email = draft_reorder_email(
                 product.supplier_name,
                 product.supplier_email,
-                [{"name": product.name, "sku": product.sku, "stock_quantity": product.stock_quantity}]
+                [{"name": product.name, "sku": product.sku, "stock_quantity": product.stock_quantity}],
+                lang=lang,
             )
 
     if existing_row:

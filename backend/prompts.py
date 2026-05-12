@@ -75,10 +75,9 @@ Return ONLY valid JSON, no other text:
 
 PLANNER_REASONING_PROMPT = """
 You are the reasoning engine for an AI operations assistant for a Turkish SME called "Esnaf Tezgahı".
-Based on the context below, write a single clear paragraph (3-5 sentences) explaining in plain English 
-what the system detected, what actions were taken, and any important follow-up items.
+Based on the context below, write a single clear paragraph (3-5 sentences) explaining what the system detected, what actions were taken, and any important follow-up items.
 Be specific about product names and quantities. Be professional but conversational.
-
+{language_instruction}
 Context:
 {context}
 
@@ -87,8 +86,8 @@ Write only the reasoning paragraph, no JSON, no lists, no headers.
 
 EMAIL_DRAFT_PROMPT = """
 You are an assistant helping a Turkish SME owner draft a supplier reorder email.
-Write a professional, concise email in English requesting restocking.
-
+Write a professional, concise email requesting restocking.
+{language_instruction}
 Supplier name: {supplier_name}
 Supplier email: {supplier_email}
 Products to reorder:

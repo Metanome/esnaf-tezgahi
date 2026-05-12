@@ -1,11 +1,12 @@
 import json
+import logging
 import re
 import time
 from functools import lru_cache
 
 from google import genai
 from google.genai import types
-from google.genai.errors import ServerError
+from google.genai.errors import ClientError, ServerError
 
 from config import get_settings
 
@@ -39,10 +40,32 @@ def _parse_json_response(text: str) -> dict:
     return json.loads(match.group())
 
 
+def _call_with_fallback(fn, model: str | None = None, **kwargs):
+    """Call fn with model fallback on 429 (quota), 404 (missing), or exhausted 503 retries."""
+    primary = model or _get_model()
+    candidates = [primary] + [m for m in list_models() if m != primary]
+
+    last_exc: Exception = RuntimeError("No models available")
+    for candidate in candidates:
+        try:
+            return _with_retry(fn, model=candidate, **kwargs)
+        except ClientError as exc:
+            if exc.status_code in (429, 404):
+                logging.warning(f"Model {candidate!r} failed ({exc.status_code}), trying fallback")
+                last_exc = exc
+                continue
+            raise
+        except ServerError as exc:
+            logging.warning(f"Model {candidate!r} unavailable after retries, trying fallback")
+            last_exc = exc
+            continue
+    raise last_exc
+
+
 def generate_text(prompt: str, model: str | None = None) -> str:
-    response = _with_retry(
+    response = _call_with_fallback(
         _get_client().models.generate_content,
-        model=model or _get_model(),
+        model=model,
         contents=prompt,
     )
     return response.text
@@ -54,9 +77,9 @@ def generate_json(prompt: str, model: str | None = None) -> dict:
 
 def generate_from_image(image_bytes: bytes, mime_type: str, prompt: str, model: str | None = None) -> dict:
     image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
-    response = _with_retry(
+    response = _call_with_fallback(
         _get_client().models.generate_content,
-        model=model or _get_model(),
+        model=model,
         contents=[image_part, prompt],
     )
     return _parse_json_response(response.text)
@@ -100,9 +123,9 @@ def clear_client_cache() -> None:
 
 def generate_from_audio(audio_bytes: bytes, mime_type: str, prompt: str, model: str | None = None) -> dict:
     audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
-    response = _with_retry(
+    response = _call_with_fallback(
         _get_client().models.generate_content,
-        model=model or _get_model(),
+        model=model,
         contents=[audio_part, prompt],
     )
     return _parse_json_response(response.text)

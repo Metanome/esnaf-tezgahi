@@ -15,8 +15,10 @@ class SettingsUpdate(BaseModel):
 class ProfileResponse(BaseModel):
     display_name: str
     store_name: str
+    language_preference: str
 
 
 class ProfileUpdate(BaseModel):
     display_name: str | None = None
     store_name: str | None = None
+    language_preference: str | None = None

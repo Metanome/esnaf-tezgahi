@@ -35,7 +35,7 @@ export default function Navbar({ isOpen, onClose }) {
               Esnaf Tezgahı
             </div>
             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              AI Operations Platform
+              {t.appSubtitle}
             </div>
           </div>
           <button onClick={onClose} className="md:hidden" style={{ color: 'var(--text-secondary)' }}>
