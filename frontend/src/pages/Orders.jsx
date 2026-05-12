@@ -90,7 +90,7 @@ export default function Orders() {
             </div>
 
             {expanded === order.id && order.items.length > 0 && (
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <div className="mt-3 pt-3 animate-in fade-in slide-in-from-top-1 duration-150" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
