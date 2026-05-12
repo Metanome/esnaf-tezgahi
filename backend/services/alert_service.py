@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 from database import get_connection
 from repositories.product_repository import ProductRepository
@@ -62,6 +63,6 @@ def check_and_alert_stock(product_id: int):
         from services.event_service import notify_clients
         notify_clients("update")
     except Exception as e:
-        print(f"Background alert sync failed for product {product_id}: {e}")
+        logging.error(f"Background alert sync failed for product {product_id}: {e}", exc_info=e)
     finally:
         conn.close()

@@ -1,6 +1,7 @@
 import sqlite3
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from google.genai.errors import ServerError
 
 from agents import classifier_agent, vision_agent, voice_agent
 from agents.planner_agent import synthesize_reasoning
@@ -41,17 +42,26 @@ async def upload_image(
 
     image_bytes = await file.read()
 
-    classification = classifier_agent.classify_image(image_bytes, file.content_type)
+    try:
+        classification = classifier_agent.classify_image(image_bytes, file.content_type)
+    except ServerError:
+        raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
+
     if classification.type == "unknown" or classification.confidence == "low":
         raise HTTPException(
             status_code=422,
             detail="Could not identify the image. Please upload a clear photo of an order slip or a shelf.",
         )
 
-    if classification.type == "order_slip":
-        result = vision_agent.process_order_slip(image_bytes, file.content_type, conn)
-    else:
-        result = vision_agent.process_shelf_scan(image_bytes, file.content_type, conn)
+    try:
+        if classification.type == "order_slip":
+            result = vision_agent.process_order_slip(image_bytes, file.content_type, conn)
+        else:
+            result = vision_agent.process_shelf_scan(image_bytes, file.content_type, conn)
+    except ServerError:
+        raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
     log_repo = AgentLogRepository(conn)
     log_repo.create(
@@ -81,7 +91,12 @@ async def upload_audio(
         )
 
     audio_bytes = await file.read()
-    intent_result = voice_agent.process_audio(audio_bytes, mime)
+    try:
+        intent_result = voice_agent.process_audio(audio_bytes, mime)
+    except ServerError:
+        raise HTTPException(status_code=503, detail="AI model temporarily unavailable. Please try again in a moment.")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
     actions: list[str] = [f"[mic] Transcribed: \"{intent_result.original_transcription}\""]
     alerts_created = 0

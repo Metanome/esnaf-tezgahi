@@ -11,7 +11,7 @@ export default function AgentThinking({ step = 0 }) {
       style={{ border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)', background: 'color-mix(in srgb, var(--accent) 8%, transparent)' }}>
       <div className="relative w-12 h-12">
         <div className="absolute inset-0 rounded-full border-2" style={{ borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)' }} />
-        <div className="absolute inset-0 rounded-full border-t-2 animate-spin" style={{ borderTopColor: 'var(--accent)', borderColor: 'transparent' }} />
+        <div className="absolute inset-0 rounded-full border-t-2 animate-spin" style={{ borderColor: 'transparent', borderTopColor: 'var(--accent)' }} />
       </div>
       <div className="text-center">
         <div className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>{STEPS[step] ?? t.processing}</div>

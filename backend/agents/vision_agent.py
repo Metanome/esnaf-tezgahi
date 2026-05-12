@@ -81,7 +81,7 @@ def process_order_slip(
         f"Notes: {extraction.notes or 'none'}."
     )
     reasoning = planner_agent.synthesize_reasoning(context)
-    alerts_created = sum(1 for a in actions if "Alert created" in a)
+    alerts_created = sum(1 for a in actions if a.startswith("[alert]"))
 
     return UploadResult(
         input_type="image_order",
@@ -120,12 +120,19 @@ def process_shelf_scan(
             sync_alert(conn, product_id)
             actions.append(f"[alert] Alert synced for '{product_display}' via shelf scan")
         else:
-            alert_repo.create(AlertCreate(
-                type="critical_stock" if detected.status == "critical" else "low_stock",
-                product_id=None,
-                message=f"Shelf scan detected unknown product '{detected.name}' as {detected.status}.",
-            ))
-            actions.append(f"[alert] Alert: '{detected.name}' appears {detected.status} on shelf")
+            existing = conn.execute(
+                "SELECT id FROM alerts WHERE product_id IS NULL AND resolved = 0 AND message LIKE ?",
+                (f"%'{detected.name}'%",),
+            ).fetchone()
+            if not existing:
+                alert_repo.create(AlertCreate(
+                    type="critical_stock" if detected.status == "critical" else "low_stock",
+                    product_id=None,
+                    message=f"Shelf scan detected unknown product '{detected.name}' as {detected.status}.",
+                ))
+                actions.append(f"[alert] Alert: '{detected.name}' appears {detected.status} on shelf")
+            else:
+                actions.append(f"[info] Existing alert for unknown product '{detected.name}' already active")
 
     context = (
         f"Input type: shelf scan. "
