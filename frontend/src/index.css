@@ -20,24 +20,61 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-@layer base {
-  html { @apply bg-slate-950 text-slate-300 antialiased; }
-  body { @apply min-h-screen; }
-  * { @apply border-slate-700; }
+:root {
+  --bg-base: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-elevated: #334155;
+  --border-color: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --accent: #14b8a6;
+  --accent-hover: #0d9488;
+  --font-size-base: 16px;
 }
+
+[data-theme="light"] {
+  --bg-base: #F7F4EF;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #EEE9E0;
+  --border-color: #D9D0C2;
+  --text-primary: #1C1A15;
+  --text-secondary: #5A5040;
+  --text-muted: #9B8E7A;
+  --accent: #3B6D11;
+  --accent-hover: #639922;
+}
+
+[data-fontsize="md"] { --font-size-base: 16px; }
+[data-fontsize="lg"] { --font-size-base: 18px; }
+[data-fontsize="xl"] { --font-size-base: 20px; }
+
+html {
+  font-size: var(--font-size-base);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s, color 0.2s;
+}
+body { min-height: 100vh; }
+* { border-color: var(--border-color); }
 
 @layer components {
   .card {
-    @apply bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    @apply rounded-xl p-5 shadow-sm;
   }
   .btn-primary {
-    @apply bg-teal-600 hover:bg-teal-500 text-white font-semibold px-4 py-2 rounded-lg
-           transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--accent);
+    @apply text-white font-semibold px-4 py-2 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
+  .btn-primary:hover { background-color: var(--accent-hover); }
   .btn-ghost {
-    @apply text-slate-400 hover:text-slate-200 hover:bg-slate-800 px-3 py-1.5 rounded-lg
-           transition-all duration-150 text-sm;
+    color: var(--text-secondary);
+    @apply px-3 py-1.5 rounded-lg transition-all duration-150 text-sm;
   }
+  .btn-ghost:hover { color: var(--text-primary); background-color: var(--bg-elevated); }
   .badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap;
   }
@@ -45,17 +82,27 @@
   .badge-low { @apply bg-amber-500/15 text-amber-400; }
   .badge-critical { @apply bg-red-500/15 text-red-400; }
   .badge-source { @apply bg-teal-500/15 text-teal-400; }
+  [data-theme="light"] .badge-ok { color: #3B6D11; background-color: #EAF3DE; }
+  [data-theme="light"] .badge-low { color: #854F0B; background-color: #FAEEDA; }
+  [data-theme="light"] .badge-critical { color: #A32D2D; background-color: #FCEBEB; }
+  [data-theme="light"] .badge-source { color: #3B6D11; background-color: #EAF3DE; }
   .input {
-    @apply bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200
-           placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500
-           focus:border-transparent w-full transition-all duration-150;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    @apply rounded-lg px-3 py-2 w-full transition-all duration-150;
   }
+  .input::placeholder { color: var(--text-muted); }
+  .input:focus { outline: none; border-color: var(--accent); }
   .select {
-    @apply bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200
-           placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500
-           focus:border-transparent w-full transition-all duration-150 appearance-none cursor-pointer;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    @apply rounded-lg px-3 py-2 w-full transition-all duration-150 appearance-none cursor-pointer;
   }
+  .select:focus { outline: none; border-color: var(--accent); }
   .section-title {
-    @apply text-lg font-semibold text-slate-200 mb-4;
+    color: var(--text-primary);
+    @apply text-lg font-semibold mb-4;
   }
 }

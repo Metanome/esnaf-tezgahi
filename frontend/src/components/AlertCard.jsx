@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { ALERT_TYPE_LABELS } from '../constants'
+import { useTheme } from '../providers/ThemeProvider'
 import { MailIcon, XIcon, CheckCircleIcon } from './Icons'
 
 export default function AlertCard({ alert, onResolve }) {
   const [showEmail, setShowEmail] = useState(false)
   const [resolving, setResolving] = useState(false)
-
+  const { lang } = useTheme()
   const isCritical = alert.type === 'critical_stock'
 
   const handleResolve = async () => {
@@ -22,38 +23,35 @@ export default function AlertCard({ alert, onResolve }) {
               {ALERT_TYPE_LABELS[alert.type]}
             </span>
             {alert.product_name && (
-              <span className="text-xs text-slate-500">{alert.product_name}</span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{alert.product_name}</span>
             )}
           </div>
-          <p className="text-sm text-slate-300">{alert.message}</p>
-          <p className="text-xs text-slate-600 mt-1">
-            {new Date(alert.created_at).toLocaleString()}
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{alert.message}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+            {new Date(alert.created_at).toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US')}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {alert.draft_email && (
-            <button
-              className="btn-ghost text-teal-400 hover:text-teal-300 flex items-center gap-1.5"
-              onClick={() => setShowEmail(v => !v)}
-            >
+            <button className="btn-ghost flex items-center gap-1.5" style={{ color: 'var(--accent)' }}
+              onClick={() => setShowEmail(v => !v)}>
               <MailIcon size={14} />
-              {showEmail ? 'Hide' : 'Email'}
+              {showEmail ? (lang === 'tr' ? 'Gizle' : 'Hide') : (lang === 'tr' ? 'E-posta' : 'Email')}
             </button>
           )}
-          <button
-            className="btn-ghost text-green-400 hover:text-green-300 disabled:opacity-40 flex items-center gap-1.5"
-            onClick={handleResolve}
-            disabled={resolving}
-          >
-            {resolving ? '...' : <><CheckCircleIcon size={14} /> Dismiss</>}
+          <button className="btn-ghost disabled:opacity-40 flex items-center gap-1.5"
+            style={{ color: '#4ade80' }}
+            onClick={handleResolve} disabled={resolving}>
+            {resolving ? '...' : <><CheckCircleIcon size={14} /> {lang === 'tr' ? 'Kapat' : 'Dismiss'}</>}
           </button>
         </div>
       </div>
-
       {showEmail && alert.draft_email && (
-        <div className="mt-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
-          <div className="text-xs text-teal-400 font-semibold mb-2">Draft Supplier Email</div>
-          <pre className="text-xs text-slate-300 whitespace-pre-wrap font-sans">{alert.draft_email}</pre>
+        <div className="mt-3 p-3 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)' }}>
+          <div className="text-xs font-semibold mb-2" style={{ color: 'var(--accent)' }}>
+            {lang === 'tr' ? 'Tedarikçi E-posta Taslağı' : 'Draft Supplier Email'}
+          </div>
+          <pre className="text-xs whitespace-pre-wrap font-sans" style={{ color: 'var(--text-secondary)' }}>{alert.draft_email}</pre>
         </div>
       )}
     </div>

@@ -1,9 +1,9 @@
 export default function SummaryCard({ label, value, accent = false }) {
   return (
-    <div className={`card flex items-center gap-4 ${accent ? 'border-teal-600/40' : ''}`}>
+    <div className="card" style={accent ? { borderColor: 'color-mix(in srgb, var(--accent) 40%, transparent)' } : {}}>
       <div>
-        <div className="text-2xl font-bold text-slate-100">{value ?? '-'}</div>
-        <div className="text-xs text-slate-500 mt-0.5">{label}</div>
+        <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{value ?? '-'}</div>
+        <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{label}</div>
       </div>
     </div>
   )

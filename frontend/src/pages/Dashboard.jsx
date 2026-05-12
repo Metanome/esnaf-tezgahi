@@ -2,38 +2,45 @@ import AlertCard from '../components/AlertCard'
 import SummaryCard from '../components/SummaryCard'
 import { useDashboard } from '../hooks/useDashboard'
 import { useAlerts } from '../hooks/useAlerts'
-import { SOURCE_LABELS, STATUS_LABELS } from '../constants'
+import { useTheme } from '../providers/ThemeProvider'
+import { T } from '../constants'
 
 export default function Dashboard() {
   const { summary, logs, loading, error, refresh } = useDashboard()
   const { alerts, resolve } = useAlerts(false)
+  const { lang } = useTheme()
+  const t = T[lang]
 
   const handleResolve = async (id) => {
     await resolve(id)
     refresh()
   }
 
-  if (loading) return <div className="text-slate-500 text-sm">Loading dashboard...</div>
-  if (error) return <div className="text-red-400 text-sm">Error: {error}</div>
+  if (loading) return <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Yükleniyor...</div>
+  if (error) return <div className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</div>
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Dashboard</h1>
-        <p className="text-slate-500 text-sm mt-1">Anadolu Doğal Kooperatifi - Operations Overview</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          {t.dashboard}
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          Anadolu Doğal Kooperatifi - Operations Overview
+        </p>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <SummaryCard label="Orders Today" value={summary?.orders_today ?? 0} accent />
-        <SummaryCard label="Active Alerts" value={alerts.length} />
+        <SummaryCard label={t.ordersToday} value={summary?.orders_today ?? 0} accent />
+        <SummaryCard label={t.activeAlerts} value={alerts.length} />
       </div>
 
-      {/* Active Alerts */}
       <section>
-        <h2 className="section-title">Active Alerts</h2>
+        <h2 className="section-title">{t.activeAlerts}</h2>
         {alerts.length === 0 ? (
-          <div className="card text-slate-500 text-sm text-center py-8">No active alerts - all clear</div>
+          <div className="card text-sm text-center py-8" style={{ color: 'var(--text-muted)' }}>
+            {t.noAlerts}
+          </div>
         ) : (
           <div className="space-y-3">
             {alerts.map(a => (
@@ -43,12 +50,11 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* Agent Activity Feed */}
       <section>
-        <h2 className="section-title">Agent Activity</h2>
+        <h2 className="section-title">{t.agentActivity}</h2>
         {logs.length === 0 ? (
-          <div className="card text-slate-500 text-sm text-center py-8">
-            No agent activity yet. Upload an order slip or shelf photo to get started.
+          <div className="card text-sm text-center py-8" style={{ color: 'var(--text-muted)' }}>
+            {t.noActivity}
           </div>
         ) : (
           <div className="space-y-3">
@@ -58,11 +64,11 @@ export default function Dashboard() {
                   <span className="badge badge-source">
                     {log.input_type.replace('_', ' ').toUpperCase()}
                   </span>
-                  <span className="text-xs text-slate-600 ml-auto">
+                  <span className="text-xs ml-auto" style={{ color: 'var(--text-muted)' }}>
                     {new Date(log.created_at).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-sm text-slate-300">{log.reasoning}</p>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{log.reasoning}</p>
               </div>
             ))}
           </div>

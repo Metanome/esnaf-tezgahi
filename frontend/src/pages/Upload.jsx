@@ -3,6 +3,8 @@ import { uploadImage, uploadAudio } from '../api/upload'
 import AgentThinking from '../components/AgentThinking'
 import ReasoningPanel from '../components/ReasoningPanel'
 import { ImageIcon, MicIcon, RotateCcwIcon, UploadIcon } from '../components/Icons'
+import { useTheme } from '../providers/ThemeProvider'
+import { T } from '../constants'
 
 const ACCEPTED_IMAGE = 'image/jpeg,image/png,image/webp'
 const ACCEPTED_AUDIO = 'audio/wav,audio/mpeg,audio/mp4,audio/ogg,audio/webm'
@@ -20,10 +22,8 @@ function DropZone({ onFile, accept, label, icon, hint, disabled }) {
 
   return (
     <label
-      className={`card flex flex-col items-center justify-center gap-3 cursor-pointer border-2 border-dashed
-        transition-all duration-200 py-12 text-center
-        ${dragging ? 'border-teal-400 bg-teal-900/20' : 'border-slate-700 hover:border-slate-500'}
-        ${disabled ? 'opacity-40 pointer-events-none' : ''}`}
+      className={`card flex flex-col items-center justify-center gap-3 cursor-pointer border-2 border-dashed transition-all duration-200 py-12 text-center ${disabled ? 'opacity-40 pointer-events-none' : ''}`}
+      style={{ borderColor: dragging ? 'var(--accent)' : 'var(--border-color)' }}
       onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
@@ -31,21 +31,18 @@ function DropZone({ onFile, accept, label, icon, hint, disabled }) {
     >
       <div className="mb-1 opacity-70">{icon}</div>
       <div>
-        <div className="text-slate-200 font-semibold">{label}</div>
-        <div className="text-xs text-slate-500 mt-1">{hint}</div>
+        <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</div>
+        <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{hint}</div>
       </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => { if (e.target.files[0]) onFile(e.target.files[0]) }}
-      />
+      <input ref={inputRef} type="file" accept={accept} className="hidden"
+        onChange={(e) => { if (e.target.files[0]) onFile(e.target.files[0]) }} />
     </label>
   )
 }
 
 export default function Upload() {
+  const { lang } = useTheme()
+  const t = T[lang]
   const [thinking, setThinking] = useState(false)
   const [thinkStep, setThinkStep] = useState(0)
   const [result, setResult] = useState(null)
@@ -56,12 +53,8 @@ export default function Upload() {
     setError(null)
     setThinking(true)
     setThinkStep(0)
-
     const steps = [1, 2, 3, 4]
-    const timers = steps.map((s, i) =>
-      setTimeout(() => setThinkStep(s), (i + 1) * 1800)
-    )
-
+    const timers = steps.map((s, i) => setTimeout(() => setThinkStep(s), (i + 1) * 1800))
     try {
       const data = await uploadFn(file)
       steps.forEach((_, i) => clearTimeout(timers[i]))
@@ -77,62 +70,44 @@ export default function Upload() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Upload</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Drop an order slip, shelf photo, or voice note - the agent handles the rest.
-        </p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t.uploadTitle}</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{t.uploadDesc}</p>
       </div>
 
       {!thinking && !result && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <DropZone
-            label="Order Slip"
-            hint="JPG, PNG, or WEBP - handwritten or printed"
-            accept={ACCEPTED_IMAGE}
-            icon={<ImageIcon size={32} className="text-teal-500" />}
-            onFile={(f) => process(f, uploadImage)}
-          />
-          <DropZone
-            label="Shelf Scan"
-            hint="Photo of your storage shelf or product display"
-            accept={ACCEPTED_IMAGE}
-            icon={<ImageIcon size={32} className="text-teal-500" />}
-            onFile={(f) => process(f, uploadImage)}
-          />
-          <DropZone
-            label="Voice Note"
-            hint="WAV, MP3, or M4A - speak in Turkish or English"
-            accept={ACCEPTED_AUDIO}
-            icon={<MicIcon size={32} className="text-teal-500" />}
-            onFile={(f) => process(f, uploadAudio)}
-          />
+          <DropZone label={t.orderSlip} hint={t.orderSlipDesc} accept={ACCEPTED_IMAGE}
+            icon={<ImageIcon size={32} style={{ color: 'var(--accent)' }} />}
+            onFile={(f) => process(f, uploadImage)} />
+          <DropZone label={t.shelfScan} hint={t.shelfScanDesc} accept={ACCEPTED_IMAGE}
+            icon={<ImageIcon size={32} style={{ color: 'var(--accent)' }} />}
+            onFile={(f) => process(f, uploadImage)} />
+          <DropZone label={t.voiceNote} hint={t.voiceNoteDesc} accept={ACCEPTED_AUDIO}
+            icon={<MicIcon size={32} style={{ color: 'var(--accent)' }} />}
+            onFile={(f) => process(f, uploadAudio)} />
         </div>
       )}
 
       {thinking && <AgentThinking step={thinkStep} />}
 
       {error && (
-        <div className="card border-red-500/40 bg-red-950/20">
-          <p className="text-red-400 text-sm">Error: {error}</p>
+        <div className="card" style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.05)' }}>
+          <p className="text-sm" style={{ color: '#f87171' }}>Hata: {error}</p>
           <button className="btn-ghost mt-3 flex items-center gap-2" onClick={() => setError(null)}>
-            <RotateCcwIcon size={14} /> Try again
+            <RotateCcwIcon size={14} /> Tekrar dene
           </button>
         </div>
       )}
 
       {result && (
         <div className="space-y-4">
-          <div className="card border-green-500/30 bg-green-950/10">
-            <div className="text-green-400 font-semibold mb-1">Processing complete</div>
-            <p className="text-xs text-slate-500">{result.alerts_created} alert(s) created · Model: {result.model_used}</p>
+          <div className="card" style={{ borderColor: 'rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.05)' }}>
+            <div className="font-semibold mb-1" style={{ color: '#4ade80' }}>İşlem tamamlandı</div>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{result.alerts_created} uyarı oluşturuldu · Model: {result.model_used}</p>
           </div>
-          <ReasoningPanel
-            reasoning={result.reasoning}
-            actions={result.actions_taken}
-            model={result.model_used}
-          />
+          <ReasoningPanel reasoning={result.reasoning} actions={result.actions_taken} model={result.model_used} />
           <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => setResult(null)}>
-            <UploadIcon size={16} /> Upload Another
+            <UploadIcon size={16} /> Başka Dosya Yükle
           </button>
         </div>
       )}

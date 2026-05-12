@@ -11,32 +11,37 @@ import Settings from './pages/Settings'
 import { ROUTES } from './constants'
 import { SSEProvider } from './providers/SSEProvider'
 import { ToastProvider } from './providers/ToastProvider'
+import { ThemeProvider } from './providers/ThemeProvider'
+import AccessibilityBar from './components/AccessibilityBar'
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <BrowserRouter>
-      <SSEProvider>
-        <ToastProvider>
-          <div className="flex min-h-screen bg-[#0F172A]">
-            <Navbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <div className="flex-1 md:ml-56 flex flex-col min-w-0">
-              <Header onMenuClick={() => setSidebarOpen(true)} />
-              <main className="flex-1 p-4 sm:p-8 max-w-5xl mx-auto w-full">
-                <Routes>
-                  <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
-                  <Route path={ROUTES.UPLOAD} element={<Upload />} />
-                  <Route path={ROUTES.INVENTORY} element={<Inventory />} />
-                  <Route path={ROUTES.ORDERS} element={<Orders />} />
-                  <Route path={ROUTES.SETTINGS} element={<Settings />} />
-                </Routes>
-              </main>
-              <Footer />
+      <ThemeProvider>
+        <SSEProvider>
+          <ToastProvider>
+            <AccessibilityBar />
+            <div className="flex min-h-screen" style={{ background: 'var(--bg-base)' }}>
+              <Navbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+              <div className="flex-1 md:ml-56 flex flex-col min-w-0">
+                <Header onMenuClick={() => setSidebarOpen(true)} />
+                <main className="flex-1 p-4 sm:p-8 max-w-5xl mx-auto w-full">
+                  <Routes>
+                    <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+                    <Route path={ROUTES.UPLOAD} element={<Upload />} />
+                    <Route path={ROUTES.INVENTORY} element={<Inventory />} />
+                    <Route path={ROUTES.ORDERS} element={<Orders />} />
+                    <Route path={ROUTES.SETTINGS} element={<Settings />} />
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
             </div>
-          </div>
-        </ToastProvider>
-      </SSEProvider>
+          </ToastProvider>
+        </SSEProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }
