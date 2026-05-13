@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS products (
     reorder_threshold INTEGER NOT NULL DEFAULT 10,
     supplier_name    TEXT    NOT NULL DEFAULT '',
     supplier_email   TEXT    NOT NULL DEFAULT '',
-    unit_price       REAL    NOT NULL DEFAULT 0.0
+    unit_price       REAL    NOT NULL DEFAULT 0.0,
+    unit             TEXT    NOT NULL DEFAULT 'pcs'
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -70,11 +71,6 @@ def init_db() -> None:
     conn = sqlite3.connect(settings.database_path)
     try:
         conn.executescript(_CREATE_TABLES_SQL)
-        try:
-            conn.execute("ALTER TABLE profile ADD COLUMN language_preference TEXT NOT NULL DEFAULT 'tr'")
-            conn.commit()
-        except sqlite3.OperationalError:
-            pass  # Column already exists
     finally:
         conn.close()
 

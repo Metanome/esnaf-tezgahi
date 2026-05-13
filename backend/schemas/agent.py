@@ -14,6 +14,7 @@ class ClassificationResult(BaseModel):
 class ExtractedItem(BaseModel):
     product_name: str
     quantity: int
+    unit: str | None = None
 
 
 class OrderExtractionResult(BaseModel):

@@ -42,7 +42,8 @@ def process_order_slip(
                 name=item.product_name,
                 category="Needs Setup",
                 stock_quantity=0,
-                unit_price=0.0
+                unit_price=0.0,
+                unit=item.unit or "pcs",
             ))
             product = new_prod
             

@@ -8,26 +8,26 @@ from database import init_db, get_connection
 
 
 PRODUCTS = [
-    ("Sızma Zeytinyağı 500ml", "ZYT-001", "Yağlar", 8, 15, "Güven Gıda Ltd.", "siparis@guvengida.com", 89.90),
-    ("Sızma Zeytinyağı 1L", "ZYT-002", "Yağlar", 3, 10, "Güven Gıda Ltd.", "siparis@guvengida.com", 159.90),
-    ("Organik Nohut 1kg", "NHT-001", "Kuru Bakliyat", 22, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 34.50),
-    ("Kırmızı Mercimek 1kg", "MRC-001", "Kuru Bakliyat", 18, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 28.00),
-    ("Yeşil Mercimek 1kg", "MRC-002", "Kuru Bakliyat", 5, 15, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 32.00),
-    ("Üzüm Pekmezi 700g", "PKM-001", "Reçel & Pekmez", 12, 10, "Doğal Lezzetler", "satis@dogallezzetler.com", 65.00),
-    ("Dut Pekmezi 700g", "PKM-002", "Reçel & Pekmez", 4, 10, "Doğal Lezzetler", "satis@dogallezzetler.com", 72.00),
-    ("Susam Tahin 400g", "THN-001", "Tahıl & Tahini", 9, 12, "Güven Gıda Ltd.", "siparis@guvengida.com", 55.00),
-    ("Çiçek Balı 450g", "BAL-001", "Bal & Şurup", 6, 10, "Karadeniz Bal Evi", "bal@karadenizbalevi.com", 145.00),
-    ("Kestane Balı 450g", "BAL-002", "Bal & Şurup", 2, 8, "Karadeniz Bal Evi", "bal@karadenizbalevi.com", 185.00),
-    ("Domates Salçası 700g", "SLC-001", "Konserve & Turşu", 25, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 42.00),
-    ("Biber Salçası 700g", "SLC-002", "Konserve & Turşu", 19, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 45.00),
-    ("Organik Buğday Unu 1kg", "UN-001", "Tahıl & Tahini", 14, 15, "Değirmen AŞ", "info@degirmen.com", 22.00),
-    ("Tam Buğday Unu 1kg", "UN-002", "Tahıl & Tahini", 11, 15, "Değirmen AŞ", "info@degirmen.com", 24.50),
-    ("Akçaabat Tereyağı 200g", "TRY-001", "Süt Ürünleri", 7, 10, "Karadeniz Süt", "satis@karadenizsut.com", 95.00),
-    ("Köy Yumurtası (30'lu)", "YMR-001", "Taze Ürünler", 15, 10, "Çiftlik Doğal", "info@ciftlikdogal.com", 180.00),
-    ("Organik Elma Sirkesi 500ml", "SRK-001", "Sirke & Turşu", 8, 8, "Doğal Lezzetler", "satis@dogallezzetler.com", 48.00),
-    ("Karabuğday 500g", "KBD-001", "Tahıl & Tahini", 6, 8, "Değirmen AŞ", "info@degirmen.com", 38.00),
-    ("Chia Tohumu 250g", "CHI-001", "Tohum & Kuruyemiş", 10, 8, "Doğal Lezzetler", "satis@dogallezzetler.com", 85.00),
-    ("Antep Fıstığı 250g", "FST-001", "Tohum & Kuruyemiş", 0, 5, "Güneydoğu Tarım", "info@guneydogutarim.com", 220.00),
+    ("Sızma Zeytinyağı 500ml", "ZYT-001", "Yağlar", 8, 15, "Güven Gıda Ltd.", "siparis@guvengida.com", 89.90, "btl"),
+    ("Sızma Zeytinyağı 1L", "ZYT-002", "Yağlar", 3, 10, "Güven Gıda Ltd.", "siparis@guvengida.com", 159.90, "btl"),
+    ("Organik Nohut 1kg", "NHT-001", "Kuru Bakliyat", 22, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 34.50, "pkg"),
+    ("Kırmızı Mercimek 1kg", "MRC-001", "Kuru Bakliyat", 18, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 28.00, "pkg"),
+    ("Yeşil Mercimek 1kg", "MRC-002", "Kuru Bakliyat", 5, 15, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 32.00, "pkg"),
+    ("Üzüm Pekmezi 700g", "PKM-001", "Reçel & Pekmez", 12, 10, "Doğal Lezzetler", "satis@dogallezzetler.com", 65.00, "pcs"),
+    ("Dut Pekmezi 700g", "PKM-002", "Reçel & Pekmez", 4, 10, "Doğal Lezzetler", "satis@dogallezzetler.com", 72.00, "pcs"),
+    ("Susam Tahin 400g", "THN-001", "Tahıl & Tahini", 9, 12, "Güven Gıda Ltd.", "siparis@guvengida.com", 55.00, "pcs"),
+    ("Çiçek Balı 450g", "BAL-001", "Bal & Şurup", 6, 10, "Karadeniz Bal Evi", "bal@karadenizbalevi.com", 145.00, "pcs"),
+    ("Kestane Balı 450g", "BAL-002", "Bal & Şurup", 2, 8, "Karadeniz Bal Evi", "bal@karadenizbalevi.com", 185.00, "pcs"),
+    ("Domates Salçası 700g", "SLC-001", "Konserve & Turşu", 25, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 42.00, "pcs"),
+    ("Biber Salçası 700g", "SLC-002", "Konserve & Turşu", 19, 20, "Anadolu Tarım A.Ş.", "info@anadolutarim.com", 45.00, "pcs"),
+    ("Organik Buğday Unu 1kg", "UN-001", "Tahıl & Tahini", 14, 15, "Değirmen AŞ", "info@degirmen.com", 22.00, "pkg"),
+    ("Tam Buğday Unu 1kg", "UN-002", "Tahıl & Tahini", 11, 15, "Değirmen AŞ", "info@degirmen.com", 24.50, "pkg"),
+    ("Akçaabat Tereyağı 200g", "TRY-001", "Süt Ürünleri", 7, 10, "Karadeniz Süt", "satis@karadenizsut.com", 95.00, "pcs"),
+    ("Köy Yumurtası (30'lu)", "YMR-001", "Taze Ürünler", 15, 10, "Çiftlik Doğal", "info@ciftlikdogal.com", 180.00, "carton"),
+    ("Organik Elma Sirkesi 500ml", "SRK-001", "Sirke & Turşu", 8, 8, "Doğal Lezzetler", "satis@dogallezzetler.com", 48.00, "btl"),
+    ("Karabuğday 500g", "KBD-001", "Tahıl & Tahini", 6, 8, "Değirmen AŞ", "info@degirmen.com", 38.00, "pkg"),
+    ("Chia Tohumu 250g", "CHI-001", "Tohum & Kuruyemiş", 10, 8, "Doğal Lezzetler", "satis@dogallezzetler.com", 85.00, "pkg"),
+    ("Antep Fıstığı 250g", "FST-001", "Tohum & Kuruyemiş", 0, 5, "Güneydoğu Tarım", "info@guneydogutarim.com", 220.00, "pkg"),
 ]
 
 ORDERS = [
@@ -82,8 +82,8 @@ def seed() -> None:
             conn.execute(
                 """INSERT INTO products
                    (name, sku, category, stock_quantity, reorder_threshold,
-                    supplier_name, supplier_email, unit_price)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    supplier_name, supplier_email, unit_price, unit)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 p,
             )
 

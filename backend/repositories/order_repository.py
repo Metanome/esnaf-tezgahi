@@ -82,7 +82,7 @@ class OrderRepository:
     def _get_items(self, order_id: int) -> list[OrderItemResponse]:
         rows = self._conn.execute(
             """
-            SELECT oi.id, oi.product_id, p.name AS product_name, oi.quantity, oi.unit_price
+            SELECT oi.id, oi.product_id, p.name AS product_name, oi.quantity, oi.unit_price, p.unit
             FROM order_items oi
             JOIN products p ON p.id = oi.product_id
             WHERE oi.order_id = ?
@@ -96,6 +96,7 @@ class OrderRepository:
                 product_name=r["product_name"],
                 quantity=r["quantity"],
                 unit_price=r["unit_price"],
+                unit=r["unit"],
             )
             for r in rows
         ]

@@ -23,7 +23,7 @@ Return ONLY valid JSON, no other text:
 {
   "customer_name": "<name or 'Unknown' if not found>",
   "items": [
-    {"product_name": "<product name as written>", "quantity": <integer>}
+    {"product_name": "<product name as written>", "quantity": <integer>, "unit": "<unit of measure, use canonical keys: pcs/kg/g/L/ml/pkg/box/btl/carton/sack/bunch, or null if not specified>"}
   ],
   "notes": "<any additional notes, or empty string>"
 }
@@ -67,7 +67,8 @@ Return ONLY valid JSON, no other text:
   "entities": {
     "customer_name": "<if add_order, else null>",
     "product_name": "<product mentioned, or null>",
-    "quantity": <integer or null>
+    "quantity": <integer or null>,
+    "unit": "<unit of measure if mentioned, use canonical keys: pcs/kg/g/L/ml/pkg/box/btl/carton/sack/bunch, or null>"
   },
   "original_transcription": "<full transcribed text>"
 }

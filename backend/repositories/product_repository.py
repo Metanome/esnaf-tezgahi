@@ -22,6 +22,7 @@ def _row_to_product(row: sqlite3.Row) -> ProductResponse:
         supplier_name=row["supplier_name"],
         supplier_email=row["supplier_email"],
         unit_price=row["unit_price"],
+        unit=row["unit"],
         status=_stock_status(row["stock_quantity"], row["reorder_threshold"]),
     )
 
@@ -35,10 +36,10 @@ class ProductRepository:
         sku = data.sku or f"PRD-{str(uuid.uuid4())[:8].upper()}"
         cursor = self._conn.execute(
             """
-            INSERT INTO products (name, sku, category, stock_quantity, reorder_threshold, supplier_name, supplier_email, unit_price)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO products (name, sku, category, stock_quantity, reorder_threshold, supplier_name, supplier_email, unit_price, unit)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (data.name, sku, data.category, data.stock_quantity, data.reorder_threshold, data.supplier_name, data.supplier_email, data.unit_price)
+            (data.name, sku, data.category, data.stock_quantity, data.reorder_threshold, data.supplier_name, data.supplier_email, data.unit_price, data.unit)
         )
         return self.get_by_id(cursor.lastrowid)
 

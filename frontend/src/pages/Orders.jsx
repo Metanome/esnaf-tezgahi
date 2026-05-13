@@ -105,7 +105,7 @@ export default function Orders() {
                       {order.items.map(item => (
                         <tr key={item.id} style={{ color: 'var(--text-secondary)' }}>
                           <td className="py-1">{item.product_name}</td>
-                          <td className="text-right py-1">{item.quantity}</td>
+                          <td className="text-right py-1">{item.quantity} <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{t.unitLabels[item.unit] ?? item.unit}</span></td>
                           <td className="text-right py-1">{import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}{item.unit_price.toFixed(2)}</td>
                           <td className="text-right py-1 font-medium" style={{ color: 'var(--text-primary)' }}>{import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}{(item.quantity * item.unit_price).toFixed(2)}</td>
                         </tr>

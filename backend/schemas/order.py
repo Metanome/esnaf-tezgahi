@@ -8,6 +8,7 @@ class OrderItemResponse(BaseModel):
     product_name: str
     quantity: int
     unit_price: float
+    unit: str = 'pcs'
 
 
 class OrderResponse(BaseModel):

@@ -118,7 +118,8 @@ async def upload_audio(
                     name=product_name,
                     category="Needs Setup",
                     stock_quantity=0,
-                    unit_price=0.0
+                    unit_price=0.0,
+                    unit=intent_result.entities.get("unit") or "pcs",
                 ))
                 product = new_prod
                 

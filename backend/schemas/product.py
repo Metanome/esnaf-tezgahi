@@ -10,6 +10,7 @@ class ProductCreate(BaseModel):
     supplier_name: str = ""
     supplier_email: str = ""
     unit_price: float = 0.0
+    unit: str = 'pcs'
 
 class ProductResponse(BaseModel):
     id: int
@@ -21,6 +22,7 @@ class ProductResponse(BaseModel):
     supplier_name: str
     supplier_email: str
     unit_price: float
+    unit: str
     status: str  # "ok" | "low" | "critical" - computed, not stored
 
 
@@ -32,3 +34,4 @@ class ProductUpdate(BaseModel):
     supplier_name: str | None = None
     supplier_email: str | None = None
     unit_price: float | None = None
+    unit: str | None = None

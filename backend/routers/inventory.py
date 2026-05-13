@@ -64,7 +64,8 @@ async def upload_csv(
                 reorder_threshold=int(row.get("reorder_threshold", 10)),
                 supplier_name=row.get("supplier_name", ""),
                 supplier_email=row.get("supplier_email", ""),
-                unit_price=float(row.get("unit_price", 0.0))
+                unit_price=float(row.get("unit_price", 0.0)),
+                unit=row.get("unit", "adet")
             )
             created = repo.create(product_data)
             added_count += 1

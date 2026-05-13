@@ -1,5 +1,7 @@
 export const APP_NAME = "Esnaf Tezgahı"
 
+export const UNITS = ['pcs', 'kg', 'g', 'L', 'ml', 'pkg', 'box', 'btl', 'carton', 'sack', 'bunch']
+
 export const ROUTES = {
   DASHBOARD: "/",
   UPLOAD: "/upload",
@@ -29,6 +31,7 @@ export const T = {
     notifications: "Bildirimler",
     noAlerts: "Aktif uyarı yok. Her şey yolunda!",
     viewAll: "Tümünü Gör",
+    unit: "Birim",
     ordersToday: "Bugünkü Siparişler",
     orderTotal: "Toplam",
     totalRevenue: "Toplam Gelir",
@@ -134,6 +137,7 @@ export const T = {
     dashboardSubtitle: "Anadolu Doğal Kooperatifi - Operasyon Görünümü",
     apiReference: "API Referansı →",
     stockStatusLabels: { ok: "Normal", low: "Düşük", critical: "Kritik" },
+    unitLabels: { pcs: 'adet', kg: 'kg', g: 'g', L: 'L', ml: 'ml', pkg: 'paket', box: 'kutu', btl: 'şişe', carton: 'koli', sack: 'çuval', bunch: 'demet' },
     sourceLabels: { image_order: "GÖRÜNTÜ", voice: "SES", manual: "MANUEL" },
     statusLabels: { pending: "Bekliyor", fulfilled: "Tamamlandı", cancelled: "İptal" },
     alertTypeLabels: { low_stock: "Düşük Stok", critical_stock: "Kritik Stok", setup_required: "Kurulum Gerekli" },
@@ -189,6 +193,7 @@ export const T = {
     notifications: "Notifications",
     noAlerts: "No active alerts. All clear!",
     viewAll: "View All",
+    unit: "Unit",
     ordersToday: "Orders Today",
     orderTotal: "Total",
     totalRevenue: "Total Revenue",
@@ -294,6 +299,7 @@ export const T = {
     dashboardSubtitle: "Anadolu Doğal Kooperatifi - Operations Overview",
     apiReference: "API Reference →",
     stockStatusLabels: { ok: "Normal", low: "Low Stock", critical: "Critical Stock" },
+    unitLabels: { pcs: 'pcs', kg: 'kg', g: 'g', L: 'L', ml: 'ml', pkg: 'pkg', box: 'box', btl: 'btl', carton: 'carton', sack: 'sack', bunch: 'bunch' },
     sourceLabels: { image_order: "IMAGE", voice: "VOICE", manual: "MANUAL" },
     statusLabels: { pending: "Pending", fulfilled: "Fulfilled", cancelled: "Cancelled" },
     alertTypeLabels: { low_stock: "Low Stock", critical_stock: "Critical Stock", setup_required: "Setup Required" },
