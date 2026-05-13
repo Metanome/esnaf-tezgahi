@@ -17,7 +17,7 @@ def _with_retry(fn, *args, max_retries: int = 2, **kwargs):
         try:
             return fn(*args, **kwargs)
         except ServerError as exc:
-            if exc.status_code == 503 and attempt < max_retries:
+            if exc.code == 503 and attempt < max_retries:
                 time.sleep(2 ** attempt)  # 1 s, then 2 s
                 continue
             raise
@@ -50,8 +50,8 @@ def _call_with_fallback(fn, model: str | None = None, **kwargs):
         try:
             return _with_retry(fn, model=candidate, **kwargs)
         except ClientError as exc:
-            if exc.status_code in (429, 404):
-                logging.warning(f"Model {candidate!r} failed ({exc.status_code}), trying fallback")
+            if exc.code in (429, 404):
+                logging.warning(f"Model {candidate!r} failed ({exc.code}), trying fallback")
                 last_exc = exc
                 continue
             raise

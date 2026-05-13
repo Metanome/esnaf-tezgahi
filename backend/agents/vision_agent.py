@@ -2,6 +2,7 @@ import sqlite3
 
 from agents import planner_agent
 from config import get_settings
+from i18n import t as _t
 from prompts import ORDER_EXTRACTION_PROMPT, SHELF_SCAN_PROMPT
 from repositories.alert_repository import AlertRepository
 from repositories.order_repository import OrderRepository
@@ -50,13 +51,13 @@ def process_order_slip(
                 product_id=new_prod.id,
                 message=f"New product '{item.product_name}' was auto-added from an order. Please configure pricing and SKU."
             ))
-            actions.append(f"[info] Auto-created missing product: '{item.product_name}'")
+            actions.append(_t("auto_created_product", lang, name=item.product_name))
         else:
             product = matches[0]
 
         order_items.append({"product_id": product.id, "quantity": item.quantity})
         sync_alert(conn, product.id)
-        actions.append(f"[alert] Alert synced for {product.name}")
+        actions.append(_t("alert_synced", lang, name=product.name))
 
     if order_items:
         order_repo.create(OrderCreate(
@@ -64,7 +65,7 @@ def process_order_slip(
             source="image_order",
             items=order_items,
         ))
-        actions.append(f"[ok] Order created for customer: {extraction.customer_name}")
+        actions.append(_t("order_created_customer", lang, customer=extraction.customer_name))
 
     context = (
         f"Input type: handwritten order slip. "
