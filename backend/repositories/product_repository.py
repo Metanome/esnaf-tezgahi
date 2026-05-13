@@ -100,6 +100,13 @@ class ProductRepository:
         ).fetchall()
         return [_row_to_product(r) for r in rows]
 
+    def stock_status_counts(self) -> dict:
+        rows = self._conn.execute("SELECT stock_quantity, reorder_threshold FROM products").fetchall()
+        counts = {"ok": 0, "low": 0, "critical": 0}
+        for r in rows:
+            counts[_stock_status(r["stock_quantity"], r["reorder_threshold"])] += 1
+        return counts
+
     def delete(self, product_id: int) -> bool:
         cursor = self._conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
         return cursor.rowcount > 0

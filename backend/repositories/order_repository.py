@@ -65,8 +65,19 @@ class OrderRepository:
 
     def count_today(self) -> int:
         return self._conn.execute(
-            "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = DATE('now')"
+            "SELECT COUNT(*) FROM orders WHERE DATE(created_at, 'localtime') = DATE('now', 'localtime')"
         ).fetchone()[0]
+
+    def total_revenue(self) -> float:
+        row = self._conn.execute(
+            """
+            SELECT COALESCE(SUM(oi.quantity * oi.unit_price), 0.0)
+            FROM order_items oi
+            JOIN orders o ON o.id = oi.order_id
+            WHERE o.status = 'fulfilled'
+            """
+        ).fetchone()
+        return float(row[0])
 
     def _get_items(self, order_id: int) -> list[OrderItemResponse]:
         rows = self._conn.execute(

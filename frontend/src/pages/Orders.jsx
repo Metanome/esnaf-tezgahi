@@ -98,6 +98,7 @@ export default function Orders() {
                         <th className="text-left py-1">{t.product}</th>
                         <th className="text-right py-1">{t.qty}</th>
                         <th className="text-right py-1">{t.unitPrice}</th>
+                        <th className="text-right py-1">{t.orderTotal}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -106,8 +107,15 @@ export default function Orders() {
                           <td className="py-1">{item.product_name}</td>
                           <td className="text-right py-1">{item.quantity}</td>
                           <td className="text-right py-1">{import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}{item.unit_price.toFixed(2)}</td>
+                          <td className="text-right py-1 font-medium" style={{ color: 'var(--text-primary)' }}>{import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}{(item.quantity * item.unit_price).toFixed(2)}</td>
                         </tr>
                       ))}
+                      <tr style={{ borderTop: '1px solid var(--border-color)' }}>
+                        <td colSpan={3} className="pt-2 text-right text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>{t.orderTotal}</td>
+                        <td className="pt-2 text-right font-bold" style={{ color: 'var(--accent)' }}>
+                          {import.meta.env.VITE_CURRENCY_SYMBOL || '₺'}{order.items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0).toFixed(2)}
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>

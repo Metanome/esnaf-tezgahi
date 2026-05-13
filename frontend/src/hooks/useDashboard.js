@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getDashboardSummary, getAgentLogs } from '../api/dashboard'
+import { getDashboardSummary } from '../api/dashboard'
 import { useSSE } from '../providers/SSEProvider'
 
 export function useDashboard() {
   const [summary, setSummary] = useState(null)
-  const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const { lastUpdate } = useSSE()
@@ -13,12 +12,8 @@ export function useDashboard() {
     if (!silent) setLoading(true)
     setError(null)
     try {
-      const [s, l] = await Promise.all([
-        getDashboardSummary(),
-        getAgentLogs(5),
-      ])
+      const s = await getDashboardSummary()
       setSummary(s)
-      setLogs(l)
     } catch (e) {
       if (!silent) setError(e.response?.data?.detail || e.message)
     } finally {
@@ -34,5 +29,5 @@ export function useDashboard() {
     if (lastUpdate) refresh(true)
   }, [lastUpdate, refresh])
 
-  return { summary, logs, loading, error, refresh }
+  return { summary, loading, error, refresh }
 }

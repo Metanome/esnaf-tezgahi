@@ -9,6 +9,7 @@ from database import db_dependency
 from repositories.agent_log_repository import AgentLogRepository
 from repositories.alert_repository import AlertRepository
 from repositories.order_repository import OrderRepository
+from repositories.product_repository import ProductRepository
 from schemas.agent import AgentActionLog
 from schemas.settings import SettingsResponse, SettingsUpdate, ProfileResponse, ProfileUpdate
 
@@ -95,9 +96,15 @@ def update_profile(
 def dashboard_summary(conn: sqlite3.Connection = Depends(db_dependency)) -> dict:
     order_repo = OrderRepository(conn)
     alert_repo = AlertRepository(conn)
+    product_repo = ProductRepository(conn)
+    stock_counts = product_repo.stock_status_counts()
+    total_products = sum(stock_counts.values())
     return {
         "orders_today": order_repo.count_today(),
         "active_alerts": alert_repo.count_unresolved(),
+        "total_revenue": order_repo.total_revenue(),
+        "stock_counts": stock_counts,
+        "total_products": total_products,
     }
 
 
