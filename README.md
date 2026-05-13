@@ -5,6 +5,13 @@
 <p align="center"><em>Smart Merchant Assistant</em></p>
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3" /></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white" alt="Python 3.11+" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115.12-009688?logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React-19.2.6-61DAFB?logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TailwindCSS-4.3.0-06B6D4?logo=tailwindcss&logoColor=white" alt="TailwindCSS v4" />
+  <img src="https://img.shields.io/badge/Google%20Gemini-AI-4285F4?logo=google&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/Language-TR%20%7C%20EN-orange" alt="Bilingual TR/EN" />
 </p>
 
 **Esnaf Tezgahı** is a multimodal, agentic AI platform engineered for Turkish SMEs — local cooperatives, boutique shops, and neighborhood markets.
@@ -122,9 +129,9 @@ Every upload produces a **Reasoning Panel** in the UI showing the full chain of 
 
 | Layer | Technologies |
 |---|---|
-| **Backend** | Python 3.11, FastAPI 0.115, SQLite, Pydantic v2, `google-genai` 1.14, `uvicorn` |
-| **Frontend** | React 18, Vite, TailwindCSS v4, CSS Custom Properties |
-| **AI** | Google Gemini (`gemini-2.0-flash` default; model is configurable) |
+| **Backend** | Python 3.11+, FastAPI 0.115.12, SQLite 3, Pydantic 2.11.4, `google-genai` 1.14.0, `uvicorn` 0.34.2 |
+| **Frontend** | React 19.2.6, Vite 8.0.12, TailwindCSS 4.3.0, CSS Custom Properties |
+| **AI** | Google Gemini (`gemini-3.1-flash-lite` default; model is configurable) |
 | **Realtime** | Server-Sent Events (SSE) |
 | **Testing** | Manual |
 
@@ -179,7 +186,7 @@ cp .env.example .env
 ```
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-DEFAULT_MODEL=gemini-2.0-flash
+DEFAULT_MODEL=gemini-3.1-flash-lite
 DATABASE_PATH=./esnaf.db
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```

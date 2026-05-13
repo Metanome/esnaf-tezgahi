@@ -5,6 +5,13 @@
 <p align="center"><em>Akıllı Esnaf Asistanı</em></p>
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lisans-AGPL%20v3-blue.svg" alt="Lisans: AGPL v3" /></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white" alt="Python 3.11+" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115.12-009688?logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React-19.2.6-61DAFB?logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TailwindCSS-4.3.0-06B6D4?logo=tailwindcss&logoColor=white" alt="TailwindCSS v4" />
+  <img src="https://img.shields.io/badge/Google%20Gemini-AI-4285F4?logo=google&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/Dil-TR%20%7C%20EN-orange" alt="İki Dilli TR/EN" />
 </p>
 
 **Esnaf Tezgahı**, Türk KOBİ'leri için — yerel kooperatifler, butik dükkanlar ve mahalle marketleri için — geliştirilmiş çok modlu, ajanlı bir yapay zeka platformudur.
@@ -122,9 +129,9 @@ Her yükleme, arayüzde tam düşünce zincirini ve zaman damgalı eylem günlü
 
 | Katman | Teknolojiler |
 |---|---|
-| **Arka Uç** | Python 3.11, FastAPI 0.115, SQLite, Pydantic v2, `google-genai` 1.14, `uvicorn` |
-| **Ön Uç** | React 18, Vite, TailwindCSS v4, CSS Özel Özellikleri |
-| **Yapay Zeka** | Google Gemini (`gemini-2.0-flash` varsayılan; model yapılandırılabilir) |
+| **Arka Uç** | Python 3.11+, FastAPI 0.115.12, SQLite 3, Pydantic 2.11.4, `google-genai` 1.14.0, `uvicorn` 0.34.2 |
+| **Ön Uç** | React 19.2.6, Vite 8.0.12, TailwindCSS 4.3.0, CSS Özel Özellikleri |
+| **Yapay Zeka** | Google Gemini (`gemini-3.1-flash-lite` varsayılan; model yapılandırılabilir) |
 | **Gerçek Zamanlı** | Sunucu Taraflı Olaylar (SSE) |
 | **Test** | Manuel |
 
@@ -179,7 +186,7 @@ cp .env.example .env
 ```
 ```env
 GEMINI_API_KEY=gemini_api_anahtariniz
-DEFAULT_MODEL=gemini-2.0-flash
+DEFAULT_MODEL=gemini-3.1-flash-lite
 DATABASE_PATH=./esnaf.db
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
