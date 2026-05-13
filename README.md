@@ -1,24 +1,15 @@
 <p align="center">
-  <span style="display:inline-flex;align-items:center;gap:12px;">
-    <span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:#6366f1;">
-      <img src="frontend/src/assets/logo-icon.svg" width="28" height="28" alt="" />
-    </span>
-    <span style="display:inline-flex;flex-direction:column;text-align:left;">
-      <strong style="font-size:1.5rem;line-height:1.2;">Esnaf Tezgahı</strong>
-      <span style="color:#888;font-size:0.85rem;">Smart Merchant Assistant</span>
-    </span>
-  </span>
+  <img src="frontend/src/assets/logo-icon.svg" width="72" height="72" alt="Esnaf Tezgahı" />
 </p>
-
-# Esnaf Tezgahı
-
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+<h1 align="center">Esnaf Tezgahı</h1>
+<p align="center"><em>Smart Merchant Assistant</em></p>
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3" /></a>
+</p>
 
 **Esnaf Tezgahı** is a multimodal, agentic AI platform engineered for Turkish SMEs — local cooperatives, boutique shops, and neighborhood markets.
 
 Developed for the **YZTA 5.0 Hackathon**, it modernizes traditional retail by eliminating manual data entry. Merchants manage inventory, process customer orders, and handle supplier communications through natural voice commands and image recognition of handwritten order slips or storage shelves — all in Turkish or English.
-
----
 
 ## Key Features
 
@@ -86,8 +77,6 @@ Every upload produces a **Reasoning Panel** in the UI showing the full chain of 
 - **API key update** — change the active Gemini API key at runtime without restarting.
 - **Database reset** — wipes and re-seeds the database from the Settings page Danger Zone.
 
----
-
 ## Application Pages
 
 | Page | Description |
@@ -100,8 +89,6 @@ Every upload produces a **Reasoning Panel** in the UI showing the full chain of 
 | **Activity** | Chronological agent action log with input type, reasoning, actions taken, and model used |
 | **Settings** | Gemini model selection, Gemini API key update, current model/key status, and database reset (Danger Zone) |
 
----
-
 ## Tech Stack
 
 | Layer | Technologies |
@@ -111,8 +98,6 @@ Every upload produces a **Reasoning Panel** in the UI showing the full chain of 
 | **AI** | Google Gemini (`gemini-2.0-flash` default; model is configurable) |
 | **Realtime** | Server-Sent Events (SSE) |
 | **Testing** | pytest, pytest-asyncio, httpx |
-
----
 
 ## Project Structure
 
@@ -141,8 +126,6 @@ hackathon/
     │   └── index.css        # CSS variables, theme definitions, global component styles
     └── public/
 ```
-
----
 
 ## Getting Started
 
@@ -206,8 +189,6 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 > **Note:** The frontend dev server proxies `/api` requests to `http://localhost:8000` automatically via Vite config.
 
----
-
 ## CSV Import Format
 
 To bulk-import products via the Inventory page, prepare a UTF-8 CSV with these columns:
@@ -223,8 +204,6 @@ To bulk-import products via the Inventory page, prepare a UTF-8 CSV with these c
 | `unit` | — | `pcs` | Canonical key: `pcs`, `kg`, `g`, `L`, `ml`, `pkg`, `box`, `btl`, `carton`, `sack`, `bunch` |
 | `supplier_name` | — | `""` | |
 | `supplier_email` | — | `""` | Used for automated reorder emails |
-
----
 
 ## Hackathon Submission Notes
 
