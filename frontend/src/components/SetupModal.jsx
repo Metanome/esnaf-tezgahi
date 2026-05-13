@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { useProfile } from '../providers/ProfileProvider'
 import { useTheme } from '../providers/ThemeProvider'
 import { T, APP_NAME } from '../constants'
-import { XIcon } from './Icons'
+import { GlobeIcon, MoonIcon, SunIcon, XIcon } from './Icons'
 
 
 export default function SetupModal() {
   const { profile, saveProfile, setNeedsSetup } = useProfile()
-  const { lang, toggleLang } = useTheme()
+  const { lang, theme, toggleTheme, toggleLang } = useTheme()
   const t = T[lang]
   const isEditing = !!profile.display_name
 
@@ -40,13 +40,22 @@ export default function SetupModal() {
 
         {/* Top row: lang toggle (left) + close button (right, edit mode only) */}
         <div className="flex justify-between items-center mb-4">
-          <button
-            onClick={toggleLang}
-            className="text-xs font-semibold px-2.5 py-1 rounded-md transition-all"
-            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
-          >
-            {lang === 'tr' ? 'EN' : 'TR'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} title={t.appearance}
+              className="p-1.5 rounded-lg transition-colors flex items-center justify-center"
+              style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}>
+              {theme === 'dark' ? <SunIcon size={16} /> : <MoonIcon size={16} />}
+            </button>
+            <button onClick={toggleLang} title={t.language}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-colors"
+              style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border-color)' }}>
+              <GlobeIcon size={13} />{lang.toUpperCase()}
+            </button>
+          </div>
           {isEditing ? (
             <button
               onClick={() => setNeedsSetup(false)}
@@ -62,11 +71,10 @@ export default function SetupModal() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-2xl font-bold text-white mb-4"
-            style={{ background: 'var(--accent)' }}
-          >
-            {APP_NAME[0]}
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+            style={{ background: 'var(--accent)' }}>
+            <img src="/favicon.svg" alt={APP_NAME} className="w-9 h-9"
+              style={{ filter: 'brightness(0) invert(1)' }} />
           </div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
             {t.setupWelcome}
