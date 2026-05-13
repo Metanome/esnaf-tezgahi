@@ -1,7 +1,9 @@
 import asyncio
+import io
 import sqlite3
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, UploadFile, File
+from PIL import Image
 from google.genai.errors import ServerError
 
 from agents import classifier_agent, vision_agent, voice_agent
@@ -30,6 +32,23 @@ def _base_mime(content_type: str) -> str:
     return content_type.split(";")[0].strip()
 
 
+_MAX_IMAGE_BYTES = 3 * 1024 * 1024
+
+def _compress_image(data: bytes, mime: str) -> tuple[bytes, str]:
+    if len(data) <= _MAX_IMAGE_BYTES:
+        return data, mime
+    img = Image.open(io.BytesIO(data)).convert("RGB")
+    img.thumbnail((1920, 1920), Image.LANCZOS)
+    buf = io.BytesIO()
+    quality = 85
+    img.save(buf, format="JPEG", quality=quality, optimize=True)
+    while buf.tell() > _MAX_IMAGE_BYTES and quality > 40:
+        quality -= 10
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=quality, optimize=True)
+    return buf.getvalue(), "image/jpeg"
+
+
 @router.post("/image", response_model=UploadResult)
 async def upload_image(
     file: UploadFile = File(...),
@@ -43,9 +62,10 @@ async def upload_image(
         )
 
     image_bytes = await file.read()
+    image_bytes, image_mime = await asyncio.to_thread(_compress_image, image_bytes, file.content_type)
 
     try:
-        classification = await asyncio.to_thread(classifier_agent.classify_image, image_bytes, file.content_type)
+        classification = await asyncio.to_thread(classifier_agent.classify_image, image_bytes, image_mime)
     except ServerError:
         raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
 
@@ -57,9 +77,9 @@ async def upload_image(
 
     try:
         if classification.type == "order_slip":
-            result = await asyncio.to_thread(vision_agent.process_order_slip, image_bytes, file.content_type, conn, lang)
+            result = await asyncio.to_thread(vision_agent.process_order_slip, image_bytes, image_mime, conn, lang)
         else:
-            result = await asyncio.to_thread(vision_agent.process_shelf_scan, image_bytes, file.content_type, conn, lang)
+            result = await asyncio.to_thread(vision_agent.process_shelf_scan, image_bytes, image_mime, conn, lang)
     except ServerError:
         raise HTTPException(status_code=503, detail="ERR_AI_UNAVAILABLE")
     except ValueError:
@@ -68,7 +88,7 @@ async def upload_image(
     log_repo = AgentLogRepository(conn)
     log_repo.create(
         input_type=result.input_type,
-        input_summary=f"{classification.type} detected (confidence: {classification.confidence})",
+        input_summary=_t("image_log_summary", lang, type=classification.type, confidence=classification.confidence),
         reasoning=result.reasoning,
         actions_taken=result.actions_taken,
         model_used=result.model_used,
@@ -108,7 +128,7 @@ async def upload_audio(
     order_repo = OrderRepository(conn)
 
     if intent_result.intent == "add_order":
-        customer = intent_result.entities.get("customer_name") or "Unknown"
+        customer = intent_result.entities.get("customer_name") or _t("customer_unknown", lang)
         product_name = intent_result.entities.get("product_name")
         quantity = intent_result.entities.get("quantity") or 1
         if product_name:
@@ -116,18 +136,18 @@ async def upload_audio(
             if not matches:
                 new_prod = product_repo.create(ProductCreate(
                     name=product_name,
-                    category="Needs Setup",
+                    category=_t("category_needs_setup", lang),
                     stock_quantity=0,
                     unit_price=0.0,
                     unit=intent_result.entities.get("unit") or "pcs",
                 ))
                 product = new_prod
-                
+
                 alert_repo = AlertRepository(conn)
                 alert_repo.create(AlertCreate(
                     type="setup_required",
                     product_id=new_prod.id,
-                    message=f"New product '{product_name}' was auto-added from a voice note. Please configure pricing and SKU."
+                    message=_t("setup_required_message_voice", lang, name=product_name)
                 ))
                 actions.append(_t("auto_created_product", lang, name=product_name))
                 alerts_created += 1
@@ -162,7 +182,7 @@ async def upload_audio(
             matches = product_repo.search_by_name(product_name)
             if matches:
                 p = matches[0]
-                actions.append(_t("stock_query_result", lang, name=p.name, qty=p.stock_quantity, status=p.status))
+                actions.append(_t("stock_query_result", lang, name=p.name, qty=p.stock_quantity, status=_t(f"status_{p.status}", lang)))
             else:
                 actions.append(_t("product_not_found", lang, name=product_name))
 
@@ -179,7 +199,7 @@ async def upload_audio(
     model_used = get_settings().default_model
     log_repo.create(
         input_type="voice",
-        input_summary=f"Voice note: '{intent_result.original_transcription[:80]}'",
+        input_summary=_t("voice_log_summary", lang, text=intent_result.original_transcription[:80]),
         reasoning=reasoning,
         actions_taken=actions,
         model_used=model_used,

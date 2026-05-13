@@ -191,7 +191,7 @@ python seed.py
 
 Start the API server:
 ```bash
-uvicorn main:app --reload --port 8000
+python main.py
 ```
 
 ### 2. Frontend Setup

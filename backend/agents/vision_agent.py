@@ -40,7 +40,7 @@ def process_order_slip(
         if not matches:
             new_prod = product_repo.create(ProductCreate(
                 name=item.product_name,
-                category="Needs Setup",
+                category=_t("category_needs_setup", lang),
                 stock_quantity=0,
                 unit_price=0.0,
                 unit=item.unit or "pcs",
@@ -50,7 +50,7 @@ def process_order_slip(
             alert_repo.create(AlertCreate(
                 type="setup_required",
                 product_id=new_prod.id,
-                message=f"New product '{item.product_name}' was auto-added from an order. Please configure pricing and SKU."
+                message=_t("setup_required_message_order", lang, name=item.product_name)
             ))
             actions.append(_t("auto_created_product", lang, name=item.product_name))
         else:
@@ -114,7 +114,7 @@ def process_shelf_scan(
 
         if product_id:
             sync_alert(conn, product_id)
-            actions.append(f"[alert] Alert synced for '{product_display}' via shelf scan")
+            actions.append(_t("shelf_alert_synced", lang, name=product_display))
         else:
             existing = conn.execute(
                 "SELECT id FROM alerts WHERE product_id IS NULL AND resolved = 0 AND message LIKE ?",
@@ -124,11 +124,11 @@ def process_shelf_scan(
                 alert_repo.create(AlertCreate(
                     type="critical_stock" if detected.status == "critical" else "low_stock",
                     product_id=None,
-                    message=f"Shelf scan detected unknown product '{detected.name}' as {detected.status}.",
+                    message=_t("shelf_unknown_alert_message", lang, name=detected.name, status=detected.status),
                 ))
-                actions.append(f"[alert] Alert: '{detected.name}' appears {detected.status} on shelf")
+                actions.append(_t("shelf_unknown_action", lang, name=detected.name, status=detected.status))
             else:
-                actions.append(f"[info] Existing alert for unknown product '{detected.name}' already active")
+                actions.append(_t("shelf_existing_alert", lang, name=detected.name))
 
     context = (
         f"Input type: shelf scan. "

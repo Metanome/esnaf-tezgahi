@@ -62,3 +62,14 @@ app.include_router(events.router)
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", "service": "Esnaf Tezgahı"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "main:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+        reload_excludes=["*.db", "*.log"],
+        timeout_graceful_shutdown=2
+    )

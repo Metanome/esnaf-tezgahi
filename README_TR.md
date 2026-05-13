@@ -191,7 +191,7 @@ python seed.py
 
 API sunucusunu başlatın:
 ```bash
-uvicorn main:app --reload --port 8000
+python main.py
 ```
 
 ### 2. Ön Uç Kurulumu

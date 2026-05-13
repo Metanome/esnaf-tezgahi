@@ -1,6 +1,7 @@
 import logging
 import sqlite3
 from database import get_connection
+from i18n import t as _t
 from repositories.product_repository import ProductRepository
 from repositories.alert_repository import AlertRepository
 from schemas.alert import AlertCreate
@@ -28,18 +29,16 @@ def sync_alert(conn: sqlite3.Connection, product_id: int):
             alert_repo.resolve(existing_row["id"])
         return
 
-    # Prepare alert details
+    profile_row = conn.execute("SELECT language_preference FROM profile WHERE id = 1").fetchone()
+    lang = profile_row["language_preference"] if profile_row else "tr"
+
     alert_type = "critical_stock" if product.status == "critical" else "low_stock"
-    message = f"{product.name} is {product.status} stock ({product.stock_quantity} units)."
-    
+    status_label = _t(f"status_{product.status}", lang)
+    message = _t("alert_stock_message", lang, name=product.name, status=status_label, qty=product.stock_quantity)
+
     draft_email = None
     if product.status == "critical":
-        # Only draft if a supplier exists
         if product.supplier_name and product.supplier_email:
-            profile_row = conn.execute(
-                "SELECT language_preference FROM profile WHERE id = 1"
-            ).fetchone()
-            lang = profile_row["language_preference"] if profile_row else "tr"
             draft_email = draft_reorder_email(
                 product.supplier_name,
                 product.supplier_email,
