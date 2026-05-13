@@ -140,7 +140,7 @@ export default function Header({ onMenuClick }) {
                     </div>
                   )}
                   <div className="p-2">
-                    <Link to={ROUTES.DASHBOARD}
+                    <Link to={ROUTES.ALERTS}
                       className="block w-full text-center py-1.5 rounded text-sm transition-colors"
                       style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
                       onClick={() => setShowDropdown(false)}>

@@ -3,7 +3,7 @@ import logoIcon from '../assets/logo-icon.svg'
 import { ROUTES, T } from '../constants'
 import { useTheme } from '../providers/ThemeProvider'
 import { useProfile } from '../providers/ProfileProvider'
-import { LayoutDashboardIcon, UploadIcon, PackageIcon, ShoppingCartIcon, SettingsIcon, XIcon, ClockIcon } from './Icons'
+import { LayoutDashboardIcon, UploadIcon, PackageIcon, ShoppingCartIcon, SettingsIcon, XIcon, ClockIcon, BellIcon } from './Icons'
 
 export default function Navbar({ isOpen, onClose }) {
   const { lang } = useTheme()
@@ -12,6 +12,7 @@ export default function Navbar({ isOpen, onClose }) {
 
   const links = [
     { to: ROUTES.DASHBOARD, label: t.dashboard, icon: <LayoutDashboardIcon size={18} /> },
+    { to: ROUTES.ALERTS, label: t.alerts, icon: <BellIcon size={18} /> },
     { to: ROUTES.UPLOAD, label: t.upload, icon: <UploadIcon size={18} /> },
     { to: ROUTES.INVENTORY, label: t.inventory, icon: <PackageIcon size={18} /> },
     { to: ROUTES.ORDERS, label: t.orders, icon: <ShoppingCartIcon size={18} /> },

@@ -1,12 +1,12 @@
-import AlertCard from '../components/AlertCard'
 import SummaryCard from '../components/SummaryCard'
 import SkeletonCard from '../components/SkeletonCard'
 import { useDashboard } from '../hooks/useDashboard'
 import { useProfile } from '../providers/ProfileProvider'
 import { useAlerts } from '../hooks/useAlerts'
 import { useTheme } from '../providers/ThemeProvider'
-import { T } from '../constants'
-import { ShoppingCartIcon, BellIcon, PackageIcon } from '../components/Icons'
+import { T, ROUTES } from '../constants'
+import { ShoppingCartIcon, BellIcon, PackageIcon, CheckCircleIcon } from '../components/Icons'
+import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
   const { summary, loading, error, refresh } = useDashboard()
@@ -110,16 +110,37 @@ export default function Dashboard() {
       )}
 
       <section>
-        <h2 className="section-title">{t.activeAlerts}</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="section-title mb-0">{t.activeAlerts}</h2>
+          <Link to={ROUTES.ALERTS} className="text-xs font-medium" style={{ color: 'var(--accent)' }}>{t.viewAll}</Link>
+        </div>
         {alerts.length === 0 ? (
-          <div className="card text-sm text-center py-8" style={{ color: 'var(--text-muted)' }}>
-            {t.noAlerts}
-          </div>
+          <div className="card text-sm text-center py-6" style={{ color: 'var(--text-muted)' }}>{t.noAlerts}</div>
         ) : (
-          <div className="space-y-3">
-            {alerts.map(a => (
-              <AlertCard key={a.id} alert={a} onResolve={handleResolve} />
+          <div className="card divide-y" style={{ '--tw-divide-opacity': 1 }}>
+            {alerts.slice(0, 5).map(a => (
+              <div key={a.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                <span className={`badge shrink-0 ${a.type === 'critical_stock' ? 'badge-critical' : 'badge-low'}`}>
+                  {t.alertTypeLabels[a.type]}
+                </span>
+                <span className="text-sm flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>
+                  {a.product_name && <strong style={{ color: 'var(--text-primary)' }}>{a.product_name}</strong>}
+                  {a.product_name && ' — '}{a.message}
+                </span>
+                <button
+                  onClick={() => handleResolve(a.id)}
+                  className="btn-ghost shrink-0 flex items-center gap-1 text-xs py-0.5 px-1.5"
+                  style={{ color: 'var(--success)' }}
+                >
+                  <CheckCircleIcon size={13} /> {t.dismiss}
+                </button>
+              </div>
             ))}
+            {alerts.length > 5 && (
+              <div className="pt-2.5 text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+                <Link to={ROUTES.ALERTS} style={{ color: 'var(--accent)' }}>+{alerts.length - 5} {t.more} →</Link>
+              </div>
+            )}
           </div>
         )}
       </section>

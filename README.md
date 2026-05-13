@@ -5,7 +5,7 @@
     </span>
     <span style="display:inline-flex;flex-direction:column;text-align:left;">
       <strong style="font-size:1.5rem;line-height:1.2;">Esnaf Tezgahı</strong>
-      <span style="color:#888;font-size:0.85rem;">AI Operations Platform</span>
+      <span style="color:#888;font-size:0.85rem;">Smart Merchant Assistant</span>
     </span>
   </span>
 </p>

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Upload from './pages/Upload'
 import Inventory from './pages/Inventory'
 import Orders from './pages/Orders'
+import Alerts from './pages/Alerts'
 import Activity from './pages/Activity'
 import Settings from './pages/Settings'
 import { ROUTES } from './constants'
@@ -33,6 +34,7 @@ function AppShell() {
                     <Route path={ROUTES.UPLOAD} element={<Upload />} />
                     <Route path={ROUTES.INVENTORY} element={<Inventory />} />
                     <Route path={ROUTES.ORDERS} element={<Orders />} />
+                    <Route path={ROUTES.ALERTS} element={<Alerts />} />
                     <Route path={ROUTES.ACTIVITY} element={<Activity />} />
                     <Route path={ROUTES.SETTINGS} element={<Settings />} />
                   </Routes>
