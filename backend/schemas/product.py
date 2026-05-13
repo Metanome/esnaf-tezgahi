@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 
@@ -24,6 +25,7 @@ class ProductResponse(BaseModel):
     unit_price: float
     unit: str
     status: str  # "ok" | "low" | "critical" - computed, not stored
+    created_at: datetime | None = None
 
 
 class ProductUpdate(BaseModel):

@@ -24,6 +24,7 @@ def _row_to_product(row: sqlite3.Row) -> ProductResponse:
         unit_price=row["unit_price"],
         unit=row["unit"],
         status=_stock_status(row["stock_quantity"], row["reorder_threshold"]),
+        created_at=row["created_at"],
     )
 
 

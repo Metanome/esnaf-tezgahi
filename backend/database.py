@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS products (
     supplier_name    TEXT    NOT NULL DEFAULT '',
     supplier_email   TEXT    NOT NULL DEFAULT '',
     unit_price       REAL    NOT NULL DEFAULT 0.0,
-    unit             TEXT    NOT NULL DEFAULT 'pcs'
+    unit             TEXT    NOT NULL DEFAULT 'pcs',
+    created_at       DATETIME NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS orders (

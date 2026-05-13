@@ -10,7 +10,8 @@ import { EditIcon, SettingsIcon, TrashIcon, CheckIcon, XIcon, UploadIcon, PlusIc
 import SkeletonCard from '../components/SkeletonCard'
 import EmptyState from '../components/EmptyState'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE_OPTIONS = [10, 20, 50]
+const BADGE_DURATION_OPTIONS = { '6h': 6, '12h': 12, '24h': 24, '48h': 48, '7d': 168 }
 
 export default function Inventory() {
   const { products, loading, error, patch, create, upload, remove } = useInventory()
@@ -27,6 +28,8 @@ export default function Inventory() {
   const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(() => parseInt(localStorage.getItem('pref_page_size') || '20', 10))
+  const newBadgeMs = (BADGE_DURATION_OPTIONS[localStorage.getItem('pref_new_badge') || '24h'] || 24) * 3600000
   const toast = useToast()
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [showModal, setShowModal] = useState(false)
@@ -42,8 +45,8 @@ export default function Inventory() {
     return matchesStatus && matchesQuery
   })
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.ceil(filtered.length / pageSize)
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
 
   const handleSave = async (id) => {
     const qty = parseInt(editQty, 10)
@@ -139,7 +142,14 @@ export default function Inventory() {
                 <tr key={p.id} className="transition-colors" style={{ borderBottom: '1px solid var(--border-color)' }}
                   onMouseEnter={e => e.currentTarget.style.background = 'color-mix(in srgb, var(--accent) 5%, transparent)'}
                   onMouseLeave={e => e.currentTarget.style.background = ''}>
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--accent)' }}>{p.name}</td>
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--accent)' }}>
+                    <span className="flex items-center gap-2">
+                      {p.name}
+                      {p.created_at && (Date.now() - new Date(p.created_at).getTime() < newBadgeMs) && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)' }}>{t.badgeNew}</span>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs hidden sm:table-cell" style={{ color: 'var(--text-muted)' }}>{p.sku}</td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
                     {editId === p.id ? <input type="text" value={editCategory} onChange={e => setEditCategory(e.target.value)} className="input w-full py-1 text-sm" /> : p.category}
@@ -194,41 +204,50 @@ export default function Inventory() {
           </table>
         </div>
 
-        {totalPages > 1 && (
+        {filtered.length > 0 && (
           <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: '1px solid var(--border-color)' }}>
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} / {filtered.length} {t.paginationItems}
-            </span>
-            <div className="flex gap-2">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                className="btn-ghost text-xs px-3 py-1 disabled:opacity-40 flex items-center gap-1">
-                <ChevronLeftIcon size={12} /> {t.paginationPrev}
-              </button>
-              <div className="flex gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
-                  .reduce((acc, n, i, arr) => {
-                    if (i > 0 && n - arr[i-1] > 1) acc.push('...')
-                    acc.push(n)
-                    return acc
-                  }, [])
-                  .map((n, i) => n === '...' ? (
-                    <span key={i} className="px-2 py-1 text-xs" style={{ color: 'var(--text-muted)' }}>…</span>
-                  ) : (
-                    <button key={n} onClick={() => setPage(n)}
-                      className="px-3 py-1 rounded text-xs transition-all"
-                      style={page === n
-                        ? { background: 'var(--accent)', color: '#fff', fontWeight: 600 }
-                        : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                      {n}
-                    </button>
-                  ))}
-              </div>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                className="btn-ghost text-xs px-3 py-1 disabled:opacity-40 flex items-center gap-1">
-                {t.paginationNext} <ChevronRightIcon size={12} />
-              </button>
+            <div className="flex items-center gap-3">
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} / {filtered.length} {t.paginationItems}
+              </span>
+              <select className="text-xs py-0.5 px-1.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}
+                value={pageSize}
+                onChange={e => { const v = parseInt(e.target.value, 10); setPageSize(v); localStorage.setItem('pref_page_size', v); setPage(1) }}>
+                {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
             </div>
+            {totalPages > 1 && (
+              <div className="flex gap-2">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                  className="btn-ghost text-xs px-3 py-1 disabled:opacity-40 flex items-center gap-1">
+                  <ChevronLeftIcon size={12} /> {t.paginationPrev}
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                    .reduce((acc, n, i, arr) => {
+                      if (i > 0 && n - arr[i-1] > 1) acc.push('...')
+                      acc.push(n)
+                      return acc
+                    }, [])
+                    .map((n, i) => n === '...' ? (
+                      <span key={i} className="px-2 py-1 text-xs" style={{ color: 'var(--text-muted)' }}>…</span>
+                    ) : (
+                      <button key={n} onClick={() => setPage(n)}
+                        className="px-3 py-1 rounded text-xs transition-all"
+                        style={page === n
+                          ? { background: 'var(--accent)', color: '#fff', fontWeight: 600 }
+                          : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                        {n}
+                      </button>
+                    ))}
+                </div>
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                  className="btn-ghost text-xs px-3 py-1 disabled:opacity-40 flex items-center gap-1">
+                  {t.paginationNext} <ChevronRightIcon size={12} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -307,9 +326,7 @@ export default function Inventory() {
       <ConfirmDialog
         open={!!confirmDelete}
         title={t.deleteProduct}
-        message={lang === 'tr'
-          ? `"${confirmDelete?.name}" ürününü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
-          : `Are you sure you want to delete "${confirmDelete?.name}"? This action cannot be undone.`}
+        message={t.deleteConfirmMsg.replace('{name}', confirmDelete?.name ?? '')}
         danger
         onCancel={() => setConfirmDelete(null)}
         onConfirm={async () => {
